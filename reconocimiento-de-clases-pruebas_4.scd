@@ -1,7 +1,8 @@
 ~dir = thisProcess.nowExecutingPath.dirname;
 
 (
-var featureinfo = [[Chromagram]];
+var featureinfo = [[Chromagram, 12], [MFCC, 13]];
+var numFrames = featureinfo.collect({|descriptorArr| descriptorArr[1]}).sum;
 
 var filePath = ~dir ++ "/data.arff";
 
@@ -14,85 +15,56 @@ var inputData = (
 	"complejo":[~dir ++ "/04_complejo_Section_24_01.wav"],
 );
 
-var classNames = inputData.keys.asArray;
+var classNames = inputData.keys.asArray.sort;
 
-var arff = SCMIR.createARFF(filePath, 12, classNames);
+var sources = classNames.collect({|className| inputData[className]});
+// var sources = classNames.collect(inputData[_]);
 
-var sources = classNames.collect(inputData[_]);
-
-var stringify = {|smirs|
-    smirs.keys.collect({|className|
-        var data = smirs.at(className).flatten;
-        data.collect({|ventana| ventana.asList.add(className).join(",")})
-    }).asArray.flatten.join("\n");
+var stringify = {|scmirs|
+    scmirs.keys.asArray.sort.collect({|className|
+        var data = scmirs.at(className).flatten;
+        data.collect({|ventana|
+            ventana.asList.add(className).join(",")
+        })
+    })
+    .flatten.join("\n");
 };
 var ventanizar = ventanizar = {|len, arr|
-    var arrOverLen = arr.size/len;
-    var shape = (1..len)!(arrOverLen.asInteger)
-    // ++[(1!(arr.size - (arrOverLen.asInteger*len)))]; // agrega una ventana parcial con sun size menor a len
-    ;
+    var totalFrames = (arr.size/len).asInteger; // si totalFrames < 1 entonces se ventanizar devuelve un array vacío
+    var shape = (1..len)!totalFrames;
+    // ++[(1!(arr.size - (totalFrames.asInteger*len)))]; // agrega una ventana parcial con un size menor a len
+
     var ventanas = arr.reshapeLike(shape);
     ventanas;
 };
 
-
-var file;
-
 {
-    var smirs = sources.inject(
+    var scmirs = sources.inject(
         Dictionary.new,
-        {|dict, array, i|
+        {|dict, array, index|
 
             var data = array.collect{|filename|
-                var file;
-
-                file = SCMIRAudioFile(filename,featureinfo);
-
+                var file = SCMIRAudioFile(filename, featureinfo);
+                var data;
                 file.extractFeatures();
 
-                file.featuredata.asArray;
+                data = file.featuredata.asArray;
+                file.numframes.debug("numframes");
+                data.size.debug("size");
+                data;
             };
-			dict.put(classNames[i], data.collect(ventanizar.(12, _)));
+            dict.put(classNames[index].debug("className"), data.collect(ventanizar.(numFrames*43, _)));
             dict;
 
     });
+
+    var arff = SCMIR.createARFF(filePath, numFrames, classNames);
+    var file;
 	arff.close;
 	file = File(filePath, "a+");
-	file.write(stringify.(smirs));
+	file.write(stringify.(scmirs));
 	file.close;
-}.fork;
+}.();
 )
 
 
-// Test de función previa para ventanizar
-// (
-// var len = 43;
-// var arr = (0..200);// array de 0 a 200
-// var arrOverLen = arr.size/len;
-// var shape = (1..len)!(arrOverLen.asInteger)
-// // ++[(1!(arr.size - (arrOverLen.asInteger*len)))];
-// ;
-// var ventanas = arr.reshapeLike(shape);
-//
-// //tests
-// ventanas.debug("ventanas");
-// arr.size.debug("arr size del original");
-// ventanas.collect(_.size).debug("tamaño de ventanas").sum.debug("arr size nuevo");
-// arr.last.debug("ultimo número original");
-// ventanas.last.last.debug("ultimo numero");
-// )
-
-
-(
-var inputData = (
-        "fijo": [
-        "/media/atsintli/4D12FE8D63A43529/Doctorado/audios/Categorias/Fijo/01_fijo_Fragmente_Stille_An_Diotima_16.wav",
-    ],
-    "periodico": [
-        "/media/atsintli/4D12FE8D63A43529/Doctorado/audios/Categorias/Periodico/02_periodico_Fragmente_Stille_An_Diotima_25.wav"
-    ],
-);
-var classNames = inputData.keys.asArray;
-a = classNames.collect(inputData[_]);
-classNames;
-)
