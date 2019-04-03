@@ -2,6 +2,7 @@
 
 (
 var featureinfo = [[Chromagram, 12], [MFCC, 13]];
+
 var numFrames = featureinfo.collect({|descriptorArr| descriptorArr[1]}).sum;
 
 var filePath = ~dir ++ "/data.arff";
@@ -12,7 +13,7 @@ var inputData = (
 	"fijo": [~dir ++ "/01_fijo_Fragmente_Stille_An_Diotima_05.wav"],
 	"periodico": [~dir ++ "/02_Periodico_Cowell_Pulse_06.wav"],
 	"caotico": [~dir ++ "/03_caotico_iancu_dumitrescu_nucleons_chaotiques_transe_03.wav"],
-	"complejo":[~dir ++ "/04_complejo_Section_24_01.wav"],
+	"complejo":[~dir ++ "/04_complejo_iancu_dumitrescu_nucleons_chaotiques_transe_06.wav"],
 );
 
 var classNames = inputData.keys.asArray.sort;
@@ -29,6 +30,7 @@ var stringify = {|scmirs|
     })
     .flatten.join("\n");
 };
+
 var ventanizar = ventanizar = {|len, arr|
     var totalFrames = (arr.size/len).asInteger; // si totalFrames < 1 entonces se ventanizar devuelve un array vacío
     var shape = (1..len)!totalFrames;
@@ -38,7 +40,6 @@ var ventanizar = ventanizar = {|len, arr|
     ventanas;
 };
 
-{
     var scmirs = sources.inject(
         Dictionary.new,
         {|dict, array, index|
@@ -64,7 +65,6 @@ var ventanizar = ventanizar = {|len, arr|
 	file = File(filePath, "a+");
 	file.write(stringify.(scmirs));
 	file.close;
-}.();
 )
 
 
