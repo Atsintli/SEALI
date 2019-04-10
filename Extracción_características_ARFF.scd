@@ -1,6 +1,14 @@
 ~dir = thisProcess.nowExecutingPath.dirname; //genera variable global del directorio donde estamos, va a dar error si el archivo no esta salvado.
 
 (
+~getFilePathsOn = {|pathToFolder|
+    PathName(pathToFolder).entries.collect(_.fullPath)
+};
+
+// ~getFilePathsOn.(~dir++"/caoticos")
+)
+
+(
 var filePath = ~dir ++ "/data.arff"; //este es el archivo que se va a crear con nuestros datos
 
 var inputData = (
@@ -30,23 +38,24 @@ var features = [[MFCC, 2],[Chromagram],[SpecCentroid],[SpecPcile, 0.95],[SpecPci
 
 //contar componentes de los descriptores.
 //var numFeatures = features.collect({|descriptorArr| descriptorArr[1]}).sum;//si mando numFeatures que cuenta el segundo valor del array features y el descriptor no indica cuatas características tiene, numFeatures no funciona, esto es obvio porque le estoy diciendo que sume el segundo valor de cada array.
-
+var numFeatures = nil;
 
 //función para extraer las características de los audios
 var scmirs = sources.inject(
 	Dictionary.new,
 	{|dict, array, index|
 
-		var data = array.collect{|filename|
+		var dataArr = array.collect{|filename|
+            var data;
 			var file = SCMIRAudioFile(filename, features);
 			file.extractFeatures();
-			~numFeatures = file.numfeatures;
 			data = file.featuredata.asArray;
-			file.numfeatures.debug("numfeatures");
-            data.size.debug("size");
+
+            if(numFeatures.isNil, {numFeatures = file.numfeatures});
+
 			data;
 		};
-		dict.put(classNames[index].debug("className"), data.collect(ventanizar.(~numFeatures*ventaneo, _)));
+        dict.put(classNames[index].debug("className"), dataArr.collect({|data| ventanizar.(numFeatures*ventaneo, data)}));
 		dict;
 	});
 
@@ -62,10 +71,16 @@ var stringify = {|scmirs|
 };
 
 //crear arff y file
-var arff = SCMIR.createARFF(filePath, ~numFeatures*ventaneo, classNames);
+var arff = SCMIR.createARFF(filePath, numFeatures*ventaneo, classNames);
 var file;
 arff.close;
+
+numFeatures.debug("numfeatures");
+
 file = File(filePath, "a+");
 file.write(stringify.(scmirs));
 file.close;
 )
+
+
+
