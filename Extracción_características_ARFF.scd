@@ -11,13 +11,14 @@
 (
 var filePath = ~dir ++ "/data.arff"; //este es el archivo que se va a crear con nuestros datos
 
-var inputData = (
-	"caotico": [~dir ++ "/03_caotico_iancu_dumitrescu_nucleons_chaotiques_transe_03.wav"],
-	"complejo": [~dir ++ "/04_complejo_iancu_dumitrescu_nucleons_chaotiques_transe_06.wav"],
-	"fijo": [~dir ++ "/01_fijo_Fragmente_Stille_An_Diotima_05.wav"],
-	"periodico": [~dir ++ "/02_Periodico_Cowell_Pulse_06.wav"],
-); //Diccionario que contiene la base de datos de ejemplos de audio para analizar
+//Diccionario que contiene la base de datos de ejemplos de audio para analizar
 
+var inputData = (
+	"caotico": [~getFilePathsOn.(~dir++"/caotico")],
+	"complejo": [~getFilePathsOn.(~dir++"/complejo")],
+	"fijo": [~getFilePathsOn.(~dir++"/fijo")],
+	"periodico": [~getFilePathsOn.(~dir++"/periodico")],
+);
 
 var classNames = inputData.keys.asArray.sort; // obtenemos los nombres de las clases de acuerdo al diccionario en orden alfabético
 
