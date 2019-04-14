@@ -14,10 +14,10 @@ var filePath = ~dir ++ "/data.arff"; //este es el archivo que se va a crear con 
 //Diccionario que contiene la base de datos de ejemplos de audio para analizar
 
 var inputData = (
-	"caotico": [~getFilePathsOn.(~dir++"/caotico")],
-	"complejo": [~getFilePathsOn.(~dir++"/complejo")],
-	"fijo": [~getFilePathsOn.(~dir++"/fijo")],
-	"periodico": [~getFilePathsOn.(~dir++"/periodico")],
+	"caotico": ~getFilePathsOn.(~dir++"/caotico"),
+	"complejo": ~getFilePathsOn.(~dir++"/complejo"),
+	"fijo": ~getFilePathsOn.(~dir++"/fijo"),
+	"periodico": ~getFilePathsOn.(~dir++"/periodico"),
 );
 
 var classNames = inputData.keys.asArray.sort; // obtenemos los nombres de las clases de acuerdo al diccionario en orden alfabético
