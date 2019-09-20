@@ -53,7 +53,7 @@ t = ~startRec.("~/Desktop/recs", 3, {|fileName|
         var res;
         0.05.wait;
         res = ~getAudioFeatures.([[fileName.postln]], nil, features, ~ventanizar, ventaneo);
-        res.postln;
+        res[\unknown].flatten.flatten.postln;
     }).play
 
 });
