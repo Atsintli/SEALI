@@ -32,7 +32,7 @@ var features = [[MFCC, 2],[Chromagram],[SpecCentroid],[SpecPcile, 0.95],[SpecPci
 var file;
 
 file = File(filePath, "w");
-file.write(~getAudioFeatures.(sources, classNames, features, ~ventanizar, ventaneo));
+file.write(~stringify.(~getAudioFeatures.(sources, classNames, features, ~ventanizar, ventaneo)));
 file.close;
 )
 
