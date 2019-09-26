@@ -41,13 +41,13 @@ SynthDef("help-Diskout", { |bufnum|
     task.play;
 
 };
+);
 
-)
+// descomentar y correr individualmente
 
-/*
 (
-var features = [[MFCC, 2],[Chromagram],[SpecCentroid],[SpecPcile, 0.95],[SpecPcile, 0.8],[SpecFlatness],[FFTCrest], [FFTSpread],[FFTSlope],[SensoryDissonance],[Onsets,\rcomplex]];
-var ventaneo = 10;
+var features = [[Chromagram],[SpecPcile, 0.95],[SpecPcile, 0.80],[SpecFlatness],[BeatStatistics]];
+var ventaneo = 20;
 t = ~startRec.("~/Desktop/recs", 3, {|fileName|
     Task({
         var res;
