@@ -1,4 +1,4 @@
-// función para configurar los datos extraídos de scmirs.
+// función para agregar el nombre de la clase.
 ~stringify = {|scmirs|
     scmirs.keys.asArray.sort.collect({|className|
         var data = scmirs.at(className).flatten;
