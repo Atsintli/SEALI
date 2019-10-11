@@ -1,11 +1,11 @@
 (
 SynthDef(\micro, {
-    Out.ar(8, SoundIn.ar())
+	Out.ar(8, SoundIn.ar())
 }).add;
 
 // this will record to the disk
 SynthDef("help-Diskout", { |bufnum|
-    DiskOut.ar(bufnum, In.ar(8, 1));
+	DiskOut.ar(bufnum, In.ar(8, 1));
 }).add;
 
 ~recordSomething = {|filePath, fileNum, bufferDur, cb, i|
@@ -13,10 +13,10 @@ SynthDef("help-Diskout", { |bufnum|
 		var x = Synth(\micro);
 		var b, d;
 
-		0.5.wait;
+		0.02.wait;
 
 		// allocate a disk i/o buffer
-		b= Buffer.alloc(s, 2.pow(17), 1);
+		b= Buffer.alloc(s, 2.pow(15), 1);
 
 		// create an output file for this buffer, leave it open
 		b.write(filePath, "wav", "int16", 0, 0, true);
@@ -39,15 +39,15 @@ SynthDef("help-Diskout", { |bufnum|
 };
 
 ~startRec = {|dir, bufferDur, cb|
-    var task = Task({
-        inf.do({|i|
-			var fileNum = i % 10;
-            var filePath = (dir++"/"++fileNum++".wav").standardizePath;
-            ~recordSomething.(filePath, fileNum, bufferDur, cb, i);
-			(bufferDur+0.5).wait;
-        });
-    });
-    task.play;
+	var task = Task({
+		inf.do({|i|
+			var fileNum = i % 100;
+			var filePath = (dir++"/"++fileNum++".wav").standardizePath;
+			~recordSomething.(filePath, fileNum, bufferDur, cb, i);
+			(bufferDur+0.02).wait;
+		});
+	});
+	task.play;
 };
 );
 
@@ -59,7 +59,7 @@ var features = [[Chromagram],[SpecPcile, 0.95],[SpecPcile, 0.80],[SpecFlatness],
 var ventaneo = 20;
 t = ~startRec.("~/Desktop/recs", 0.5, {|fileName|
 	Task({
-		0.5.wait;
+		0.02.wait;
 		~res = ~getAudioFeatures.([[fileName]], nil, features, ~ventanizar, ventaneo);
 		~data = ~res[\unknown].flatten.flatten;
 	}).play
@@ -67,5 +67,4 @@ t = ~startRec.("~/Desktop/recs", 0.5, {|fileName|
 )
 
 t.stop
-*/
 
