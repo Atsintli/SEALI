@@ -1,33 +1,29 @@
+(
+o = Server.local.options;
+Server.local.options.memSize = 2.pow(18);
+Server.internal.options.memSize = 2.pow(18);
+s.boot;
+)
+
 //n = NetAddr("127.0.0.1"); // local machine
 (
-OSCdef (\osc, {|msg, time, addr, recvPort|
-	var clase, caotico, complejo, fijo, periodico;
-	msg.debug("=====================");
-	# clase, caotico, complejo, fijo, periodico = msg;
-
-	SynthDef (\prueba, {|freq|
-		var sig, out;
-		sig = SinOsc.ar(freq, 0, 0.5);
-		out = Out.ar(0, sig);
-	}).add;
-
-Synth (\prueba, [\freq, caotico]);
-
-},'/clase',recvPort: 5006); // once only
-)
+var features = [[Chromagram],[SpecPcile, 0.95],[SpecPcile, 0.80],[SpecFlatness],
+	[BeatStatistics]];
+var ventaneo = 20;
+t = ~startRec.("~/Desktop/recs", 0.5, {|fileName|
+    Task({
+        0.5.wait;
+        ~res = ~getAudioFeatures.([[fileName]], nil, features, ~ventanizar, ventaneo);
+        ~data = ~res[\unknown].flatten.flatten;
+    }).play
+});
 
 ~client = NetAddr("127.0.0.1", 5005); // loopback ----
 
-//cada que hagas un analisis
-~client.sendMsg("/features", *~data);
-
-data.j
-
-(
 Task({
 	inf.do({
 		~client.sendMsg("/features", *~data);
-		0.1.wait;
+		0.5.wait;
 	});
 }).play;
 )
