@@ -1,11 +1,11 @@
 (
 SynthDef(\micro, {
-	Out.ar(8, SoundIn.ar())
+	Out.ar(8, SoundIn.ar([0,1]))
 }).add;
 
 // this will record to the disk
 SynthDef("help-Diskout", { |bufnum|
-	DiskOut.ar(bufnum, In.ar(8, 1));
+	DiskOut.ar(bufnum, In.ar(8, 2));
 }).add;
 
 ~recordSomething = {|filePath, fileNum, bufferDur, cb, i|
@@ -16,7 +16,7 @@ SynthDef("help-Diskout", { |bufnum|
 		0.02.wait;
 
 		// allocate a disk i/o buffer
-		b= Buffer.alloc(s, 2.pow(15), 1);
+		b= Buffer.alloc(s, 2.pow(15), 2);
 
 		// create an output file for this buffer, leave it open
 		b.write(filePath, "wav", "int16", 0, 0, true);
