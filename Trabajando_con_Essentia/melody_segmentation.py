@@ -1,5 +1,4 @@
 from pylab import plot, show, figure, imshow
-#'exec(%matplotlib inline)'
 import matplotlib.pyplot as plt
 import numpy as np
 import essentia
@@ -8,87 +7,87 @@ plt.rcParams['figure.figsize'] = (15, 6) # set plot sizes to something larger th
 from essentia.standard import *
 import numpy
 import os
+import glob
 
 ###############################Melody detection#################################
 
-# Load audio file; it is recommended to apply equal-loudness filter for PredominantPitchMelodia
-sr = 44100
-hS = 254
-fS=2048
-
-audio = 'audio/0/dumitrescu.wav'
-file = audio.split('/')[2]
-audio = MonoLoader(filename=audio)()
-
-# print("Number of frames:", len(audio))
-# print("Duration of the audio sample [sec]:", len(audio)/sr)
-# print ("Vector real:", audio.size)
-#frame = audio[6*44100 : 6*44100 + 1024]
-#print ('Frames:', frame)
-
-# Extract the pitch curve
-# PitchMelodia takes the entire audio signal as input (no frame-wise processing is required)
-pitch_extractor = PredominantPitchMelodia(frameSize=fS, 
-                                            hopSize=hS, 
-                                            harmonicWeight=0.9,
-                                            magnitudeThreshold=40,
-                                            minDuration=300,
-                                            numberHarmonics=20,
-                                            timeContinuity=50,             #the maximum allowed gap duration for a pitch contour
-                                            voiceVibrato=True,
-                                            voicingTolerance=0.8
-
-                                            ) #These are samples!!! To write in audio we need to use frames
-pitch_values, pitch_confidence = pitch_extractor(audio)
-#print(pitch_values.size) # This is an array
-# Pitch is estimated on frames. Compute frame time positions
-pitch_times = numpy.linspace(0.0, len(audio)/sr, len(pitch_values) ) # Return seconds
-
- #Those two has the same size so the graph will be constructed by the times and the pitches
-#pitch_times = [x for x in pitch_times]
-#pitch_values = [x for x in pitch_values] 
-#print(len(pitch_times))
-#print((pitch_values))
-
-# extract the indexes of the pitch times
-prev_index=0
-elements = []
-for i in range(len(pitch_values)):
-    num = pitch_values[i]
-    if num > 0 and prev_index == 0:
-        elements.append(i)
-    prev_index = num
-
-# Convert the indexes into samples
-sample_segments = [n*hS for n in elements]
-print(sample_segments)
-
-numOfSegmetnts = len(sample_segments)
+#Create folder for segments
 
 folder = 'Segments/'
 if not os.path.exists(folder):
 		os.makedirs(folder)
 
-def audio_segments_generator(file):
-    for cont in range(numOfSegmetnts - 1):
-        posFrameInit = sample_segments[cont]
-        posFrameEnd = sample_segments[cont + 1]
-        MonoWriter(filename=folder + '{:03d}'.format(cont) + '_' + file,  format='wav', sampleRate=sr)(audio[posFrameInit:posFrameEnd])
-    posFrameInit = sample_segments[numOfSegmetnts-1]
-    # For last segment
-    posFrameEnd = audio.size
-    MonoWriter(filename=folder + '{:03d}'.format(cont) + '_' + file,  format='wav', sampleRate=sr)(audio[posFrameInit:posFrameEnd])
+sr = 44100
+hS = 254
+fS=2048
 
-audio_segments_generator(file)
+def concat_audio (frame_count, segment_count, segment_list,audio_list, file_index=0):
+    if frame_count < len(segment_list[segment_count])-1:
+        startFrame = segment_list[segment_count][frame_count]
+        endFrame = segment_list[segment_count][frame_count + 1]
+        filename = folder + '{:04d}'.format(file_index) + '_' + "segment.wav"
+        MonoWriter(filename=filename,  format='wav', sampleRate=sr)(audio_list[segment_count][startFrame:endFrame])
+        concat_audio(frame_count+1, segment_count, segment_list, audio_list,file_index+1)
+    else:
+        if segment_count < len(segment_list)-1:
+            concat_audio(0, segment_count+1, segment_list, audio_list, file_index)
 
-# Plot the estimated pitch contour and confidence over time
+#Extract the pitch curve
+#PitchMelodia takes the entire audio signal as input (no frame-wise processing is required)
+def audio_segments_generator(audio):
+    pitch_extractor = PredominantPitchMelodia(frameSize=fS, 
+                                            hopSize=hS, 
+                                            harmonicWeight=0.20,     #harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)
+                                            magnitudeThreshold=2, #    spectral peak magnitude threshold (maximum allowed difference from the highest peak in dBs)
+                                            guessUnvoiced=True,
+                                            #minDuration=350, #    the minimum allowed contour duration [ms]
+                                            numberHarmonics=20,
+                                            #timeContinuity=10,             #the maximum allowed gap duration for a pitch contour
+                                            # voiceVibrato=True,
+                                            #voicingTolerance=0.2,    #allowed deviation below the average contour mean salience of all contours (fraction of the standard deviation)
+                                            pitchContinuity=27.5625, #  27.5625  pitch continuity cue (maximum allowed pitch change during 1 ms time period) [cents]
+                                            #peakFrameThreshold=0.1 #0.45 funcionó para bach partita de violin per-frame salience threshold factor (fraction of the highest peak salience in a frame)
 
-f, axarr = plt.subplots(2, sharex=True)
-axarr[0].plot(pitch_times, pitch_values)
-axarr[0].set_title('estimated pitch [Hz]')
-axarr[1].plot(pitch_times, pitch_confidence)
-axarr[1].set_title('pitch confidence')
-plt.show()
 
-print('Amount of Segments:', numOfSegmetnts-1)
+                                            ) #These are samples!!! To write in audio we need to use frames
 
+    # Pitch is estimated on frames. Compute frame time positions
+    pitch_values, pitch_confidence = pitch_extractor(audio)
+    pitch_times = numpy.linspace(0.0, len(audio)/sr, len(pitch_values) ) # Return seconds
+    prev_index=0
+    elements = []
+    #Filter segments from data retrived
+    for i in range(len(pitch_values)):
+        num = pitch_values[i]
+        if num > 0 and prev_index == 0:
+            elements.append(i)
+        prev_index = num
+    # Convert the indexes into samples
+    sample_segments = [n*hS for n in elements]
+    audioSize = audio.size
+    sample_segments.insert(0,0)
+    sample_segments.append(audioSize)
+    ##############################################################
+    #Plot the estimated pitch contour and confidence over time
+
+    f, axarr = plt.subplots(2, sharex=True)
+    axarr[0].plot(pitch_times, pitch_values)
+    axarr[0].set_title('estimated pitch [Hz]')
+    axarr[1].plot(pitch_times, pitch_confidence)
+    axarr[1].set_title('pitch confidence')
+    plt.show()
+    print('Amount of Segments:', len(sample_segments))
+    return sample_segments
+
+allSampleList = []
+allAudio = []
+
+# Load audio files from folder
+
+for audio_files in glob.glob( 'audio/2/' + "*.wav" ):
+    audio = MonoLoader(filename=audio_files)()
+    sampleSegments = audio_segments_generator(audio)
+    allSampleList.append(sampleSegments)
+    allAudio.append(audio)
+
+concat_audio(0,0,allSampleList,allAudio)
