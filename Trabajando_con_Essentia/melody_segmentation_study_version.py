@@ -2,12 +2,11 @@ import sys
 import glob
 import os
 import numpy
-from essentia.standard import MonoLoader, PredominantPitchMelodia, MonoWriter
 from pylab import plot, show, figure, imshow
 import matplotlib.pyplot as plt
 import numpy as np
 import essentia
-import essentia.standard as es
+from essentia.standard import MonoLoader, PredominantPitchMelodia, MonoWriter
 # set plot sizes to something larger than default
 plt.rcParams['figure.figsize'] = (15, 6)
 
