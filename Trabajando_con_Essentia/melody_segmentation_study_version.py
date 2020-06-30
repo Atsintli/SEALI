@@ -82,10 +82,15 @@ def concat_audio(out_dir, frame_count, segment_count, segment_list, audio_list, 
     return files
 
 
+<<<<<<< Updated upstream
 def process_file(out_dir, filename):
     allSampleList = []
     allAudio = []
     audio = MonoLoader(filename=filename)()
+=======
+for audio_files in glob.glob( 'audio/' + "*.wav" ):
+    audio = MonoLoader(filename=audio_files)()
+>>>>>>> Stashed changes
     sampleSegments = audio_segments_generator(audio)
     allSampleList.append(sampleSegments)
     allAudio.append(audio)
