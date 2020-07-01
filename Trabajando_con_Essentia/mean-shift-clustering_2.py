@@ -31,7 +31,12 @@ def meanShift():
 	return n_clusters_, labels
 
 def writeFiles(n_clusters_, labels):
+
+	folder = 'Clusters/'
+	if not os.path.exists(folder):
+		os.makedirs(folder)
 	files = []
+
 	for root_dir_path, sub_dirs, file in os.walk('Segments'):
 			for f in file: # files need to be converted to strings for join
 					file = f.split('_')[0]
@@ -43,11 +48,9 @@ def writeFiles(n_clusters_, labels):
 		writer.writerows(zip(files,labels))
 
 	#concatenate classes in archives
-	#audioname = 'test'
 	clases = open('archivos_clases.txt')
 	clasescontent = clases.readlines()
 	clases = [int(x.split(" ")[1]) for x in clasescontent]
-	#print (clases)
 
 	for clase in range(n_clusters_):
 		print("iterando sobre " + str(clase))
@@ -58,13 +61,11 @@ def writeFiles(n_clusters_, labels):
 		for elements in ele:
 			num = 'Segments/{:04d}'.format(elements)
 			#print (num)
-			#nomArchivo = audioname + "/" + audioname + "_" + ".wav"
 			for audio_files in glob.glob(num + "*.wav" ):
-			#nomArchivo = audio_files
 				print("leyendo " + audio_files)
 				y, sr = librosa.load(audio_files)
 				audiototal = np.append(audiototal, y)
-			#print(audiototal)
+				#print(audiototal)
 				librosa.output.write_wav("Clusters/" + "CLASE_" 
 				+ str(clase) + ".wav", audiototal, sr)
 			#print(audiototal)
@@ -85,4 +86,4 @@ def plot(n_clusters_, labels):
 
 result = meanShift()
 writeFiles(n_clusters_=result[0], labels=result[1])
-def plot(n_clusters_=meanShift()[0], labels=meanShift()[1])
+#def plot(n_clusters_=meanShift()[0], labels=meanShift()[1])
