@@ -1,3 +1,4 @@
+import json
 import essentia
 import essentia.standard as ess
 from essentia.standard import *
@@ -6,39 +7,32 @@ import numpy as np
 from numpy import savetxt
 import glob
 import csv
+from utils import get_json, save_as_json
 
-def extract_mfccs (audio):
-    loader = essentia.standard.MonoLoader(filename=audio)
+
+def extract_mfccs(audio_file):
+    loader = essentia.standard.MonoLoader(filename=audio_file)
     audio = loader()
     mfcc = MFCC(numberCoefficients=13)
-    spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
-    w = Windowing(type = 'hann')
+    spectrum = Spectrum()
+    w = Windowing(type='hann')
 
     pool = essentia.Pool()
-    for frame in ess.FrameGenerator(audio, frameSize = 1024, hopSize = 512, startFromZero=True):
+    for frame in ess.FrameGenerator(audio, frameSize=1024, hopSize=512, startFromZero=True):
         mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
         pool.add('lowlevel.mfcc', mfcc_coeffs)
-        #pool.add('lowlevel.mfcc_bands', mfcc_bands)
-        #pool.add('lowlevel.mfcc_bands_log', logNorm(mfcc_bands))
-    
-    #YamlOutput(filename = 'mfcc.sig', format='yaml', writeVersion=False)(pool)
+    aggrPool = PoolAggregator(defaultStats=['mean'])(pool)
+    YamlOutput(filename='mfccmean.json', format='json',
+               writeVersion=False)(aggrPool)
+    mean = get_json("mfccmean.json")['lowlevel']['mfcc']['mean']
+    return {"filename": audio_file, "mean": mean}
 
-    # compute mean and variance of the frames
-    #aggrPool = PoolAggregator(defaultStats = [ 'mean', 'stdev' ])(pool)
-    aggrPool = PoolAggregator(defaultStats = ['mean'])(pool)
 
-    # and ouput those results in a file
-    YamlOutput(filename = 'mfccmean.sig', format='yaml', writeVersion=False)(aggrPool)
+def extract_all_mfccs(audio_files):
+    return list(map(extract_mfccs, audio_files))
 
-    file = open('mfccmean.sig').read()
-    mfccs = file[35:]
-    m = np.matrix(mfccs)
-    print(mfccs)
-    savetxt(f, m)
+# test
 
-file_name = 'mfccs.csv'
-f = open(file_name, 'w')
 
-for audio_files in sorted(glob.glob( 'Segments/' + "*.wav" )):
-    print(audio_files)
-    mfccs = extract_mfccs(audio_files)
+save_as_json('mfccs.json', extract_all_mfccs(
+    glob.glob('Segments/' + "*.wav")))
