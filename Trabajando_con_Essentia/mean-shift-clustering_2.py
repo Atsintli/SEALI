@@ -1,4 +1,3 @@
-print(__doc__)
 import glob
 import librosa
 import csv
@@ -9,16 +8,15 @@ from numpy import loadtxt
 import os
 import matplotlib.pyplot as plt
 from itertools import cycle
-
+import shutil
 
 def meanShift():
 	points = loadtxt('mfccs.csv')
-	X, _ = make_blobs(n_samples=len(points), n_features=13, centers=points, cluster_std=1)
-
+	X, _ = make_blobs(n_samples=len(points), n_features=13, centers=points, cluster_std=1.0)
 	# Compute clustering with MeanShift
 	# The following bandwidth can be automatically detected using
 
-	bandwidth = estimate_bandwidth(X, quantile=0.2, n_samples=2322)
+	bandwidth = estimate_bandwidth(X, quantile=0.2, n_samples=2000)
 	ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, max_iter=1000,cluster_all=True)
 	ms.fit(X)
 	labels = ms.labels_
@@ -28,10 +26,10 @@ def meanShift():
 	n_clusters_ = len(labels_unique)
 
 	print("number of estimated clusters : %d" % n_clusters_)
-	return n_clusters_, labels
+	return n_clusters_, labels, cluster_centers, X
 
+###Write files into n clusters archives###
 def writeFiles(n_clusters_, labels):
-
 	folder = 'Clusters/'
 	if not os.path.exists(folder):
 		os.makedirs(folder)
@@ -60,7 +58,6 @@ def writeFiles(n_clusters_, labels):
 		audiototal = np.array([])
 		for elements in ele:
 			num = 'Segments/{:04d}'.format(elements)
-			#print (num)
 			for audio_files in glob.glob(num + "*.wav" ):
 				print("leyendo " + audio_files)
 				y, sr = librosa.load(audio_files)
@@ -70,8 +67,37 @@ def writeFiles(n_clusters_, labels):
 				+ str(clase) + ".wav", audiototal, sr)
 			#print(audiototal)
 
+def moveToFolders(n_clusters_, labels):
+
+	files = []
+	for root_dir_path, sub_dirs, file in os.walk('Segments'):
+		for f in file: # files need to be converted to strings for join
+				file = f.split('_')[0]
+				files.append((file))
+
+	with open('archivos_clases.txt', 'w') as f:
+		writer = csv.writer(f, delimiter=' ')
+		writer.writerows(zip(files,labels))
+
+	clasescontent = open('archivos_clases.txt').readlines()
+	clases = [int(x.split(" ")[1]) for x in clasescontent]
+
+	for createFolders in range(n_clusters_):
+		folder = 'audioClases/Clase_' + str(createFolders)
+		if not os.path.exists(folder):
+			os.makedirs(folder)
+
+	for clase in range(n_clusters_):
+		ele = np.where(np.array(clases)==clase)[0]
+		print("indices de clase " + str(clase) + " son: " + str(ele))
+		for elements in ele:
+			num = 'Segments/{:04d}'.format(elements)
+			for audio_files in glob.glob( num + "*.wav" ):
+				shutil.copy(audio_files, 'audioClases/Clase_' + str(clase))
+				print('moviendo archivo', audio_files, 'a', 'audioClases/Clase_' + str(clase))
+
 # Plot result
-def plot(n_clusters_, labels):
+def ploter(n_clusters_, labels, cluster_centers, X):
 	plt.figure(1)
 	plt.clf()
 	colors = cycle('bgrcmyk')
@@ -84,6 +110,7 @@ def plot(n_clusters_, labels):
 	plt.title('Estimated number of clusters: %d' % n_clusters_)
 	plt.show()
 
-result = meanShift()
-writeFiles(n_clusters_=result[0], labels=result[1])
-#def plot(n_clusters_=meanShift()[0], labels=meanShift()[1])
+a,b,c,d = meanShift()
+#writeFiles(n_clusters_=a, labels=b)
+ploter(n_clusters_=a,labels=b,cluster_centers=c,X=d)
+moveToFolders(a,b)
