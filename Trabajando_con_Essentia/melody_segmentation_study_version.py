@@ -15,7 +15,7 @@ sys.setrecursionlimit(20000)
 
 # Create folder for segments
 
-sr = 44100
+sample_rate = 44100
 hS = 512
 fS = 2048
 
@@ -59,27 +59,34 @@ def audio_segments_generator(audio):
 
 
 # Load audio files from folder
-def concat_audio(out_dir, frame_count, segment_count, segment_list, audio_list, file_index):
+def concat_audio(out_dir, frame_count, segment_count, segment_list, audio_list, file_index, output_data):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    files = []
     print("frame, segment", frame_count, segment_count, file_index)
     if frame_count < len(segment_list[segment_count])-1:
         startFrame = segment_list[segment_count][frame_count]
         endFrame = segment_list[segment_count][frame_count + 1]
         filename = os.path.abspath(
             os.path.join(out_dir, str(file_index)+".wav"))
-        files.append(
-            {"path": filename, "start": startFrame, "end": endFrame})
-        MonoWriter(filename=filename,  format='wav', sampleRate=sr)(
-            audio_list[segment_count][startFrame:endFrame])
+        length = endFrame - startFrame
+        if length > 0:
+            output_data.append(
+                {"index": file_index,
+                 "path": filename,
+                 "start": startFrame,
+                 "end": endFrame,
+                 "length": length,
+                 "length-seconds": (endFrame - startFrame)/sample_rate,
+                 "sample_rate": sample_rate})
+            MonoWriter(filename=filename,  format='wav', sampleRate=sample_rate)(
+                audio_list[segment_count][startFrame:endFrame])
         concat_audio(out_dir, frame_count+1, segment_count,
-                     segment_list, audio_list, file_index+1)
+                     segment_list, audio_list, file_index+1, output_data)
     else:
         if segment_count < len(segment_list)-1:
             concat_audio(out_dir, 0, segment_count+1, segment_list,
-                         audio_list, file_index)
-    return files
+                         audio_list, file_index, output_data)
+    return output_data
 
 
 def process_file(out_dir, filename):
@@ -89,5 +96,5 @@ def process_file(out_dir, filename):
     sampleSegments = audio_segments_generator(audio)
     allSampleList.append(sampleSegments)
     allAudio.append(audio)
-    files = concat_audio(out_dir, 0, 0, allSampleList, allAudio, 0)
+    files = concat_audio(out_dir, 0, 0, allSampleList, allAudio, 0, [])
     return files
