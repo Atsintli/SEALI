@@ -33,6 +33,7 @@ def feature_extractor(audio_files):
     mfcc = f['lowlevel.mfcc.mean']
     entropy = f['lowlevel.spectral_entropy.mean']
 
+    print(mfcc)
     features = np.hstack([mfcc])
     #features = np.hstack([loudness])
     n_descriptors = len(features)
@@ -41,19 +42,21 @@ def feature_extractor(audio_files):
     b = np.matrix(features)
     savetxt(file, b)
 
-# def class_extractor(path):
-#     for root, dirs, files in os.walk(path):
-#         #print('Number of classes:', len(dirs))
-#         #print(dirs[0:1], dirs[1:2], dirs[2:3], dirs[3:4])
-#         count_files = len(files)
-#         return(dirs, count_files)
+def class_extractor(path):
+    for root, dirs, files in os.walk(path):
+        print('Number of classes:', len(dirs))
+        print(dirs[0:len(dirs)])
+        clases = 0
+        count_files = len(files)
+        print (dirs)
+        return(dirs, count_files)
 
-# print(class_extractor('audio'))
+class_extractor('audioClases')
 
 # #feature_extractor('audio/0/dumitrescu.wav')
 
 # for audio_files in glob.glob( 'audio/' + "0/" + "*.wav" ):
 #      feature_extractor(audio_files)
 
-for audio_files in glob.glob( 'Segments/' + "*.wav" ):
-     feature_extractor(audio_files)
+# for audio_files in glob.glob( 'audio/' + "*.wav" ):
+#      feature_extractor(audio_files)
