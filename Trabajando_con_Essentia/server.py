@@ -13,7 +13,9 @@ def melody_segmentation():
     print("received req", request.form)
     out_dir = request.form['out_dir']
     filename = request.form['filename']
-    files = meloseg.process_file(out_dir, filename)
+    opts = json.loads(request.form['opts'])
+    print(opts)
+    files = meloseg.process_file(out_dir, filename, opts)
     print(files)
     return json.dumps(files)
 
