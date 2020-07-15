@@ -7,6 +7,7 @@ import numpy as np
 from numpy import savetxt
 import glob
 import csv
+import os
 from utils import get_json, save_as_json, save_matrix_array
 
 
@@ -25,6 +26,7 @@ def extract_mfccs(audio_file):
     YamlOutput(filename='mfccmean.json', format='json',
                writeVersion=False)(aggrPool)
     mean = get_json("mfccmean.json")['lowlevel']['mfcc']['mean']
+    os.remove("mfccmean.json")
     # return {"filename": audio_file, "mean": mean}
     return {"file": audio_file, "mean": mean}
 
