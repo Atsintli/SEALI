@@ -25,8 +25,9 @@ def extract_mfccs(audio_file):
     YamlOutput(filename='mfccmean.json', format='json',
                writeVersion=False)(aggrPool)
     mean = get_json("mfccmean.json")['lowlevel']['mfcc']['mean']
-    #return {"filename": audio_file, "mean": mean}
-    return {"mean":mean}
+    # return {"filename": audio_file, "mean": mean}
+    return {"file": audio_file, "mean": mean}
+
 
 def extract_all_mfccs(audio_files):
     return list(map(extract_mfccs, audio_files))
