@@ -24,6 +24,6 @@ def mfcc_clustering(dirs, cluster_std, random_state):
     return {"data": data, "n_clusters": n_clusters}
 
 
-json.dumps(mfcc_clustering(
-    ["/home/diego/sc/overtone/taller-abierto/resources/samples/humedad_8_melodic_split_2020_06_30/"], 1.5, 2)
-)
+# json.dumps(mfcc_clustering(
+#     ["/home/diego/sc/overtone/taller-abierto/resources/samples/humedad_8_melodic_split_2020_06_30/"], 1.5, 2)
+# )
