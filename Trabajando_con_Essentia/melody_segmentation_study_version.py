@@ -19,14 +19,12 @@ sample_rate = 44100
 hS = 512
 fS = 2048
 
-
 # Extract the pitch curve
 # PitchMelodia takes the entire audio signal as input (no frame-wise processing is required)
 
-
 def audio_segments_generator(audio):
     pitch_extractor = PredominantPitchMelodia(frameSize=fS,
-                                              hopSize=1024,
+                                              hopSize=512,
                                               filterIterations=3,
                                               # harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)
                                               harmonicWeight=0.8,
@@ -102,3 +100,8 @@ def process_file(out_dir, filename):
     allAudio.append(audio)
     files = concat_audio(out_dir, 0, 0, allSampleList, allAudio, 0, [])
     return files
+
+
+#map(process_file('/Segments_2', (lista)))
+
+process_file('Segments_2', 'audio/milo.wav')
