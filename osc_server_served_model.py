@@ -8,7 +8,7 @@ from pythonosc import osc_server
 from pythonosc import udp_client
 import json
 
-client = udp_client.SimpleUDPClient('127.0.0.1', 5006) #este cliente manda a SC
+client = udp_client.SimpleUDPClient('127.0.0.1', 5006) #este cliente manda a python tensorflow_Server
 
 def tf_handler(unused_addr, *args):
   # sending get request and saving the response as response object 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
   parser.add_argument("--ip",
       default="127.0.0.1", help="The ip to listen on")
   parser.add_argument("--port",
-      type=int, default=5005, help="The port to listen on") 
+      type=int, default=5006, help="The port to listen on") 
   args = parser.parse_args()
 
   dispatcher = dispatcher.Dispatcher()
