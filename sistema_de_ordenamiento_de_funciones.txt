@@ -1,0 +1,49 @@
+Sistema de ordenamiento de funciones SEALI
+
+
+##Generar bases dos bases de datos de audio y un modelo (delay-mode analysis)
+
+get_data_segments_by_MFCCs_mesure >> feture_extraction >> audio_descriptors_extended
+
+audio_descriptors_extended >> unclassified_dataset_csv (sustituir por guardar los datos en lista)
+
+##Agrupar audio para crear una base de datos anotada 
+
+unclassified_dataset_csv  >> meanShiftClustering >> detected_audio_clusters_to_folders
+
+##altertaviva >> base_de_datos_csv_sin_supervision >> generar_un_archivo_por_grupos_de_audio
+
+##Generar modelo de tensorflow
+
+detected_audio_clusters_to_folders >> feture_extraction >> antotated_database
+
+anotated_database >> DNN_classifier >> tfs_model_generator >> model
+
+run()
+
+##Send and revice data (real-time analysis)
+
+open_microphone > realtime_feture_extraction >> json_data_sender_python
+
+json_data_sender_python >> model_with_tfM_server >> request_prediction_from_model >> prediction
+
+prediction >> python_OSC_data_sender
+
+python_OSC_data_sender >> Supercollider_OSC_data_reciver >> Supercollider_soundAction
+
+##remitente_de_datos_OSC_python >> receptor_de_datos_OSC_Supercollider
+
+run()
+
+Sistema de analisis de la forma musical SIAFORMUS versión "strings"
+#Este sistema tiene que replicar a varias escalas más
+
+segmentar_audio_en_n_segundos >> feture_extraction >> send_features_to_model >> extract_class_from_audio_segments 
+extract_class_from_audio_segments  >> write_audio_class_predictions_as_strings_to_file
+write_audio_class_predictions_to_file >> file_predictions >> to_markov_chain(of_valiable_order) >> markov_chain
+markov_chain >> serch_timbral_similatity >> search_temporal_index(where_am_I) >> retrieve_prediction_from_assigned_weight_similarity_VS_temporality 
+retrieve_prediction_from_assigned_weight_similarity_VS_temporality  >> predict_next_segment_from_now
+predict_next_segment_from_now >> return_similar_sound_action_from_database
+
+
+actualización del modelo

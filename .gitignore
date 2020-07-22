@@ -1,0 +1,23 @@
+.DS_Store
+data.arff
+
+audio_descriptors_extended/
+
+audioClases/
+
+Clusters/
+
+Segments/
+
+respaldo code/
+
+Clusters_Clare_Cooper/
+
+seg/
+
+Models/
+
+.vscode/
+
+__pycache__
+
