@@ -5,7 +5,7 @@ import subprocess
 #in_dir = 'audioClases/'
 #out_dir = 'audio_descriptors_anotated_data/'
 
-in_dir = 'Segments/'
+in_dir = 'Segments_2/'
 out_dir = 'audio_descriptors_extended/'
 
 print(out_dir)

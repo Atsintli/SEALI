@@ -8,8 +8,8 @@ import numpy as np
 #entrada carpeta con sonidos
 #salida lugar de carpeta nueva para guardar pedacitos
 
-rootDir = '/media/atsintli/archives/audio_data_base'
-out_dir = 'Segments/'
+rootDir = '/media/atsintli/archives/audio_data_base/audio_test'
+out_dir = 'Segments_2/'
 print(rootDir)
 if not os.path.exists(out_dir):
 	os.makedirs(out_dir)

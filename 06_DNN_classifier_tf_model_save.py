@@ -50,8 +50,8 @@ ts_features, ts_labels = shuffle(ts_features, ts_labels)
 
 ### Define a model
 ins=13
-outs=6
-ins2 = 36
+outs=15
+ins2 = 1000
 
 def create_model():
   model = tf.keras.models.Sequential([
@@ -88,7 +88,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
 model = create_model()
 model.fit(tr_features, tr_labels,  
           batch_size=5,
-          epochs = 50, 
+          epochs = 100, 
           validation_data = (ts_features, ts_labels),
           callbacks = [cp_callback])  # pass callback to training
 

@@ -22,7 +22,7 @@ def save_as_json(file_name, data):
         f.close()
 
 def save_descriptors_as_matrix(file_name, features):
-	f = open(file_name, 'w')
-	m = np.matrix(features)
-	savetxt(f, m)
+	with open(file_name, 'w') as f:
+	    m = np.matrix(features)
+	    savetxt(f, m)
 	print('Save Descriptors as Matrix: Done')

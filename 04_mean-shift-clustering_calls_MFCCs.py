@@ -13,28 +13,35 @@ import os
 import matplotlib.pyplot as plt
 from itertools import cycle
 import shutil
+import os
+
+folder = "audioClases_2/"
+try:
+    shutil.rmtree(folder)
+except OSError as e:
+    print ("Error: %s - %s." % (e.filename, e.strerror))
 
 # features is [[float]]
-def meanShift(features, random_state=3):
-    X, _ = make_blobs(n_samples=len(features),
-                      n_features=24,
-                      centers=[(8,8),(5,5),(3,3),(2,2),(1,1)],
-                      #centers = [[1,1,1],[5,5,5],[3,10,10]],
-                      #centers = features,
-                      cluster_std=1.3,
-                      shuffle=True,
-                      random_state=random_state
-                      )
+def meanShift(features, random_state=None):
+    # X, _ = make_blobs(n_samples=len(features),
+    #                   n_features=14,
+    #                   #centers=[(8,8),(5,5),(3,3),(2,2)],
+    #                   #centers = [[1,1,1],[5,5,5],[3,10,10]],
+    #                   centers = features,
+    #                   cluster_std=1.5,
+    #                   shuffle=True,
+    #                   random_state=random_state
+    #                   )
 
-    #X = features
-    bandwidth = estimate_bandwidth(X, quantile=0.07,
-                                   #n_samples=100,
+    X = features
+    bandwidth = estimate_bandwidth(X, quantile=0.1,
+                                   #n_samples=18,
                                    #random_state=4
-                                   n_jobs=-1
+                                   #n_jobs=-1
     )
 
     ms = MeanShift(bandwidth=bandwidth, bin_seeding=False,
-                   max_iter=10, cluster_all=True)
+                   max_iter=1, cluster_all=True)
     ms.fit(X)
     labels = ms.labels_
     cluster_centers = ms.cluster_centers_
@@ -61,7 +68,7 @@ def ploter(n_clusters_, labels, cluster_centers, X):
 
 def moveToFolders(n_clusters_, labels):
     files = []
-    for audio_files in sorted(glob.glob( 'Segments/' + "*.wav" )):
+    for audio_files in sorted(glob.glob( 'audioClases/' + "*.wav" )):
         names = audio_files.split('/')[1]
         #print(names)
         files.append(names)
@@ -82,9 +89,9 @@ def moveToFolders(n_clusters_, labels):
         ele = np.where(np.array(clases) == clase)[0]
         print("indices de clase " + str(clase) + " son: " + str(ele))
         for elements in ele:
-            num = 'Segments/{:05d}'.format(elements)
+            num = 'audioClases_2/{:05d}'.format(elements)
             for audio_files in glob.glob(num + "*.wav"):
-                shutil.copy(audio_files, 'audioClases/Clase_' + str(clase))
+                shutil.copy(audio_files, 'audioClases_2/Clase_' + str(clase))
                 print('moviendo archivo', audio_files, 'a',
                       'audioClasses/Clase_' + str(clase))
 
@@ -94,7 +101,7 @@ def moveToFolders(n_clusters_, labels):
 # print (features)
 # save_descriptors_as_matrix('dataBaseAsMatrix.csv', features)
 
-features = loadtxt("dataBaseAsMatrix.csv")
+features = loadtxt("dataset_SC_test.csv")
 
 a, b, c, d = meanShift(features)
 # print(features, a, b)

@@ -10,7 +10,7 @@ import os
 from utils import get_json
 import json
 
-in_dir = 'audioClases/'
+in_dir = 'audioClases_kMeans/'
 file_out = open('anotatedDataBase.csv', 'w') #for erasing the file if already has data
 #f_out = 'anotatedMFCCsAsStrings.csv'
 
