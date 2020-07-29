@@ -17,7 +17,7 @@ try:
 except OSError as e:
     print ("Error: %s - %s." % (e.filename, e.strerror))
 
-points = loadtxt('dataset_SC_test.csv')
+points = loadtxt('dataBaseAsMatrix.csv')
 #points = loadtxt('dataBaseAsMatrix.csv')
 
 def input_fn():
@@ -26,12 +26,12 @@ def input_fn():
 
 len_X = (len(input_fn()))
 
-num_clusters = 3
+num_clusters = 4
 kmeans = tf.compat.v1.estimator.experimental.KMeans(
     num_clusters=num_clusters, use_mini_batch=True, feature_columns=None)
 
 # train
-num_iterations = 10
+num_iterations = 50
 previous_centers = None 
 for _ in range(num_iterations):
   kmeans.train(input_fn)
