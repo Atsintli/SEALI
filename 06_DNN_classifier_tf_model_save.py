@@ -8,7 +8,6 @@ import numpy as np
 import shutil
 from sklearn.utils import shuffle
 
-
 trainset = []
 clases = []
 testset = []
@@ -50,8 +49,8 @@ ts_features, ts_labels = shuffle(ts_features, ts_labels)
 
 ### Define a model
 ins=13
-outs=15
-ins2 = 1000
+outs=3
+ins2 = 1500
 
 def create_model():
   model = tf.keras.models.Sequential([
@@ -88,7 +87,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
 model = create_model()
 model.fit(tr_features, tr_labels,  
           batch_size=5,
-          epochs = 100, 
+          epochs = 50, 
           validation_data = (ts_features, ts_labels),
           callbacks = [cp_callback])  # pass callback to training
 

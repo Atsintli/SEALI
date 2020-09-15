@@ -3,12 +3,11 @@ import os
 from essentia.standard import *
 import numpy as np
 
-
 #python3 cortador.py /Users/hugosg/Documents/OttoAudios/ /Users/hugosg/Documents/OttoSalida/
 #entrada carpeta con sonidos
 #salida lugar de carpeta nueva para guardar pedacitos
 
-rootDir = '/media/atsintli/archives/audio_data_base/audio_test'
+rootDir = '/media/atsintli/archivero/aaronPHDcode/SEALI/audio_test'
 out_dir = 'Segments_2/'
 print(rootDir)
 if not os.path.exists(out_dir):

@@ -17,8 +17,8 @@ try:
 except OSError as e:
     print ("Error: %s - %s." % (e.filename, e.strerror))
 
-points = loadtxt('dataBaseAsMatrix.csv')
-#points = loadtxt('dataBaseAsMatrix.csv')
+#points = loadtxt('dataBaseAsMatrix_2.csv')
+points = loadtxt('dataBaseAsMatrix_scmir.csv')
 
 def input_fn():
   return tf.train.limit_epochs(

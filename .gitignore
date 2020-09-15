@@ -43,3 +43,5 @@ prueba_dataset_SC.csv
 archivos_clases.txt
 
 anotatedDataBase.csv
+
+*.wav

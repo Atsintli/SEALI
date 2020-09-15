@@ -10,7 +10,7 @@ import os
 from utils import get_json
 import json
 
-in_dir = 'audioClases_kMeans/'
+in_dir = 'audioClases/'
 file_out = open('anotatedDataBase.csv', 'w') #for erasing the file if already has data
 #f_out = 'anotatedMFCCsAsStrings.csv'
 
@@ -18,15 +18,17 @@ def extract_features(path):
   loader = ess.MonoLoader(filename=path)
   audio = loader()
   mfcc = MFCC(numberCoefficients=13)
-  #loudness = Loudness()
   spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
   w = Windowing(type = 'hann')
 
   pool = essentia.Pool()
-  for frame in ess.FrameGenerator(audio, frameSize = 1024, hopSize = 512, startFromZero=True):
+  for frame in ess.FrameGenerator(audio, frameSize = 2048, hopSize = 2048, startFromZero=True):
+      #mag, phase, = CartesianToPolar()(fft(w(frame)))
       mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
-      #average_loudness = loudness(spectrum(w(frame)))
+      #loudness = Loudness()(mag)
+
       pool.add('lowlevel.mfcc', mfcc_coeffs)
+      #pool.add('lowlevel.loudness', [loudness])
       #pool.add('lowlevel.loudness', average_loudness)
       #pool.add('lowlevel.mfcc_bands', mfcc_bands)
       #pool.add('lowlevel.mfcc_bands_log', logNorm(mfcc_bands))
@@ -59,9 +61,12 @@ for root, dirs, files in os.walk(in_dir):
         if file_extension.lower() == ".wav":
             newpath = in_dir + root + file
             extract_features(newpath)
+            #print(newpath)
 
-#paths = []
-#pendiente . . . 
+print('Done')
+
+# paths = []
+# #pendiente . . . 
 # def open_files_and_get_classes():
 #     #paths = []
 #     for root, dirs, files in os.walk(in_dir):
@@ -81,7 +86,7 @@ for root, dirs, files in os.walk(in_dir):
 #                 paths.append(newpath)
 #     return paths
 
-#print(open_files_and_get_classes())
-#open_files_and_get_classes()
-#list(map(extract_features, paths))
+# print(open_files_and_get_classes())
+# open_files_and_get_classes()
+# list(map(extract_features, paths))
 

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import soundcard as sc
 from struct import unpack
-from IPython import display
+#from IPython import display
 from essentia.streaming import *
 from essentia import Pool, run, array, reset
 from scipy.special import softmax
@@ -17,12 +17,12 @@ from pythonosc import udp_client
 import json
 
 sampleRate = 16000
-frameSize = 512 
-hopSize = 256
+frameSize = 2048 
+hopSize = 2048
 numberBands = 13
 
 # analysis parameters
-patchSize = 66 #control of velocity of the extractor 60 is approximately one second of audio
+patchSize = 80 #control of velocity of the extractor 60 is approximately one second of audio
 displaySize = 10
 
 bufferSize = patchSize * hopSize
@@ -71,7 +71,7 @@ def tf_handler(args):
 
 # capture and process the speakers loopback
 # the 2 selects the external interface Zoom h5
-with sc.all_microphones(include_loopback=True)[0].recorder(samplerate=sampleRate) as mic:
+with sc.all_microphones(include_loopback=True)[2].recorder(samplerate=sampleRate) as mic:
   while True:
     tf_handler(callback(mic.record(numframes=bufferSize).mean(axis=1)) )
     #print ('\n', prediction)
