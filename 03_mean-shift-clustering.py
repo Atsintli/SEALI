@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 from itertools import cycle
 import shutil
 
-file_in = "dataBaseAsMatrix_streaming.csv"
-#file_in = "dataBaseAsMatrix_standard.csv"
+#file_in = "dataBaseAsMatrix_streaming.csv"
+file_in = "dataBaseAsMatrix_standard.csv"
 
 def meanShift(features):  # features is [[float]]
     # X, _ = make_blobs(n_samples=len(features),
@@ -23,13 +23,13 @@ def meanShift(features):  # features is [[float]]
     #                     random_state=True
     #                     )
 
-    bandwidth = estimate_bandwidth(features, quantile=0.13, 
-                                    n_samples=76)
+    bandwidth = estimate_bandwidth(features, quantile=0.04, 
+                                    n_samples=2405)
 
     ms = MeanShift(
                 bandwidth=bandwidth, 
-                bin_seeding=False,
-                max_iter=10000,
+                bin_seeding=True,
+                max_iter=500,
                 cluster_all=True)
     ms.fit(features)
     labels = ms.labels_
@@ -50,7 +50,7 @@ def writeFiles(n_clusters_, labels):
         os.makedirs(folder)
     files = []
 
-    for audio_files in sorted(glob.glob( 'Segments_2/' + "*.wav" )):
+    for audio_files in sorted(glob.glob( 'Segments/' + "*.wav" )):
         names = audio_files.split('/')[1]
         #print(names)
         files.append(names)
@@ -84,7 +84,7 @@ def writeFiles(n_clusters_, labels):
 
 def moveToFolders(n_clusters_, labels):
     files = []
-    for audio_files in sorted(glob.glob( 'Segments_2/' + "*.wav" )):
+    for audio_files in sorted(glob.glob( 'Segments/' + "*.wav" )):
         names = audio_files.split('/')[1]
         #print(names)
         files.append(names)
@@ -105,7 +105,7 @@ def moveToFolders(n_clusters_, labels):
         ele = np.where(np.array(clases) == clase)[0]
         print("indices de clase " + str(clase) + " son: " + str(ele))
         for elements in ele:
-            num = 'Segments_2/{:05d}'.format(elements)
+            num = 'Segments/{:05d}'.format(elements)
             for audio_files in glob.glob(num + "*.wav"):
                 shutil.copy(audio_files, 'audioClases/Clase_' + str(clase))
                 print('moviendo archivo', audio_files, 'a',

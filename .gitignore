@@ -45,3 +45,9 @@ archivos_clases.txt
 anotatedDataBase.csv
 
 *.wav
+
+anotatedDataBase_movil.csv
+
+anotatedDataBase_test.csv
+
+audio_data_base/Probably.aiff

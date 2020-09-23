@@ -48,20 +48,16 @@ ts_features, ts_labels = shuffle(ts_features, ts_labels)
 
 
 ### Define a model
-ins=13
-outs=3
-ins2 = 1500
+ins=14
+outs=6
+ins2=64
 
 def create_model():
   model = tf.keras.models.Sequential([
     keras.layers.Dense(ins2, activation=tf.nn.relu, input_shape=(ins,)),
     keras.layers.Dense(ins2, activation=tf.nn.relu),
-    keras.layers.Dropout(0.1),
-    keras.layers.Dense(ins2, activation=tf.nn.relu),
-    keras.layers.Dropout(0.1),
-    keras.layers.Dense(ins2, activation=tf.nn.relu),
-    keras.layers.Dropout(0.1),
-    keras.layers.Dense(ins2, activation=tf.nn.relu),
+    # keras.layers.Dropout(0.01),
+    # keras.layers.Dense(ins2, activation=tf.nn.relu),
     keras.layers.Dense(outs, activation=tf.nn.softmax)
   ])
   
@@ -87,11 +83,11 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
 model = create_model()
 model.fit(tr_features, tr_labels,  
           batch_size=5,
-          epochs = 50, 
+          epochs = 10, 
           validation_data = (ts_features, ts_labels),
           callbacks = [cp_callback])  # pass callback to training
 
-dir = 'Models/saved_models/Essentia_MFCCs/1/'
+dir = 'Models/saved_models/Large_Essentia_MFCCs/1/'
 if os.path.exists(dir):
     shutil.rmtree(dir)
 os.makedirs(dir)

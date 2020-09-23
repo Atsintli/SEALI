@@ -11,8 +11,8 @@ from utils import get_json, save_descriptors_as_matrix
 import json
 import toolz as tz
 
-in_dir = 'audioClases/'
-file_out = open('anotatedDataBase.csv', 'w') #for erasing the file if already has data
+in_dir = 'movil2/'
+file_out = open('anotatedDataBase_movil.csv', 'w') #for erasing the file if already has data
 #f_out = 'anotatedMFCCsAsStrings.csv'
 
 def extract_features(audio_file):
