@@ -1,11 +1,12 @@
 #import Extract_MFCCs as xmfccs
 import glob
-import librosa
+#import librosa
 import csv
 import numpy as np
 from sklearn.cluster import MeanShift, estimate_bandwidth
 from sklearn.datasets import make_blobs
 from numpy import loadtxt
+from numpy import savetxt
 import os
 import matplotlib.pyplot as plt
 from itertools import cycle
@@ -13,6 +14,7 @@ import shutil
 
 #file_in = "dataBaseAsMatrix_streaming.csv"
 file_in = "dataBaseAsMatrix_standard.csv"
+file_test = "dataBaseAsMatrix_standard_test.csv"
 
 def meanShift(features):  # features is [[float]]
     # X, _ = make_blobs(n_samples=len(features),
@@ -133,5 +135,6 @@ features = loadtxt(file_in)
 
 a, b, c, d = meanShift(features)
 #writeFiles(n_clusters_=a, labels=b)
+savetxt("centros.csv",c)
 ploter(n_clusters_=a, labels=b, cluster_centers=c, X=d)
 moveToFolders(a, b)

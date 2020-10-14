@@ -1,0 +1,22 @@
+list -> empty
+
+segment_class
+
+jack_callback:
+  in <- nframes del microfono
+  
+  list.add(in)
+
+
+segment_thread:
+  global segment_class
+  while(true):
+    segment_candidate <- array(list)
+    if (SBic_rt(segment_candidate) == True):   ????
+      list.empty()
+      segment_features = extract_features(segment_candidate)
+      segment_class = DNN(segment_features) || center_distance(segment_features)
+      
+main:
+  initialize_jack(jack_callback)
+  start_thread(segment_thread)
