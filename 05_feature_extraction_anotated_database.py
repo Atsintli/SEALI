@@ -10,13 +10,15 @@ import os
 from utils import get_json
 import json
 
-in_dir = 'audioClases/'
-file_out = open('anotatedDataBase.csv', 'w') #for erasing the file if already has data
+in_dir = 'movil2/'
+csv_file = 'database_as_matrix_mfcc_onsets_movil.csv'
+file_out = open(csv_file, 'w') #for erasing the file if already has data
 #f_out = 'anotatedDataBase_movil.csv'
 #f_out = 'anotatedMFCCsAsStrings.csv'
 
 def extract_features(path):
-  loader = ess.MonoLoader(filename=path)
+  #loader = ess.MonoLoader(filename=path)
+  loader = essentia.standard.EqloudLoader(filename=audio_file)
   audio = loader()
   mfcc = MFCC(numberCoefficients=13)
   spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
@@ -29,7 +31,6 @@ def extract_features(path):
       mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
       #loudness = Loudness()(mag)
       onset = OnsetDetection()(mag,phase)
-
 
       pool.add('lowlevel.mfcc', mfcc_coeffs)
       pool.add('lowlevel.onsets', onset)
@@ -51,8 +52,9 @@ def extract_features(path):
   f_in = 'features.json'
   features = get_json(f_in)['lowlevel']['mfcc']['mean']
   features.append(get_json(f_in)['lowlevel']['onsets']['mean'])
+  #features.append('0') //for testset
   features.append(class_number)
-  f_out = 'anotatedDataBase.csv'
+  f_out = csv_file
   f_out = open(f_out, 'a')
   writer = csv.writer(f_out)
   writer.writerow(features)
@@ -69,8 +71,9 @@ for root, dirs, files in os.walk(in_dir):
         print("\t", "Analyzing:", file)
         file_name, file_extension = os.path.splitext(file)
         if file_extension.lower() == ".wav":
-            newpath = in_dir + root + file
-            extract_features(newpath)
+            audio_file = in_dir + root + file
+            extract_features(audio_file)
+
 
 print('Done')
 

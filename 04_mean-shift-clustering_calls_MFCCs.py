@@ -34,7 +34,7 @@ def meanShift(features, random_state=None):
     #                   )
 
     X = features
-    bandwidth = estimate_bandwidth(X, quantile=0.1,
+    bandwidth = estimate_bandwidth(X, quantile=0.5,
                                    #n_samples=18,
                                    #random_state=4
                                    #n_jobs=-1

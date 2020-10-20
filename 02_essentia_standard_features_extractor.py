@@ -15,6 +15,7 @@ import toolz as tz
 
 def extract_mfccs(audio_file):
     loader = essentia.standard.MonoLoader(filename=audio_file)
+    print("Analyzing:" + audio_file)
     audio = loader()
     spectrum = Spectrum()
     melBands = MelBands()
@@ -25,22 +26,22 @@ def extract_mfccs(audio_file):
     for frame in ess.FrameGenerator(audio, frameSize=2048, hopSize=2048, startFromZero=True): #for chroma frameSize=8192*2, hopSize=8192, #fz=88200, hs=44100
         mag, phase, = CartesianToPolar()(fft(w(frame)))
         mfcc_bands, mfcc_coeffs = MFCC(numberCoefficients=13)(mag)
-        # mel_bands = melBands(spectrum(w(frame)))
+        #mel_bands = melBands(spectrum(w(frame)))
         # contrast, spectralValley = SpectralContrast()(mag)
-        # flatness = Flatness()(mag) 
-        # onset = OnsetDetection()(mag,phase)
-        # dynamic_complexity, loudness = DynamicComplexity()(mag)
-        # spectral_complex = SpectralComplexity()(mag)
+        flatness = Flatness()(mag) 
+        onset = OnsetDetection()(mag,phase)
+        dynamic_complexity, loudness = DynamicComplexity()(mag)
+        spectral_complex = SpectralComplexity()(mag)
         #croma = Chromagram(sampleRate=2048*5)(mag[1:],)
 
         pool.add('lowlevel.mfcc', mfcc_coeffs)
-        # pool.add('lowlevel.loudness', [loudness])
-        # pool.add('lowlevel.melbands', mel_bands)
-        # pool.add('lowlevel.spectralcontrast', contrast)
-        # pool.add('lowlevel.flatness', [flatness])
-        # pool.add('lowlevel.onsets', [onset])
-        # pool.add('lowlevel.dyncomplex', [dynamic_complexity])
-        # pool.add('lowlevel.spectral_complexity', [spectral_complex])
+        #pool.add('lowlevel.loudness', [loudness])
+        #pool.add('lowlevel.melbands', mel_bands)
+        #pool.add('lowlevel.spectralcontrast', contrast)
+        pool.add('lowlevel.flatness', [flatness])
+        pool.add('lowlevel.onsets', [onset])
+        pool.add('lowlevel.dyncomplex', [dynamic_complexity])
+        pool.add('lowlevel.spectral_complexity', [spectral_complex])
         #pool.add('lowlevel.chroma', croma)
 
     aggrPool = PoolAggregator(defaultStats=['mean'])(pool)
@@ -56,14 +57,14 @@ def extract_mfccs(audio_file):
     #os.remove("mfccmean.json")
     return {"file": audio_file, 
             "mfccMean": json_data['lowlevel']['mfcc']['mean'], 
-            # "mel": json_data['lowlevel']['melbands']['mean'], 
+            #"mel": json_data['lowlevel']['melbands']['mean'], 
             # "loudness": json_data['lowlevel']['loudness']['mean'],
             # "spectralContrast": json_data['lowlevel']['spectralcontrast']['mean'],
             # "chroma": json_data['lowlevel']['chroma']['mean'],
-            # "flatness": json_data['lowlevel']['flatness']['mean'],
-            # "onsets": json_data['lowlevel']['onsets']['mean'],
-            # "dyncomplexity": json_data['lowlevel']['dyncomplex']['mean'],
-            # "complexity": json_data['lowlevel']['spectral_complexity']['mean']
+            "flatness": json_data['lowlevel']['flatness']['mean'],
+            "onsets": json_data['lowlevel']['onsets']['mean'],
+            "dyncomplexity": json_data['lowlevel']['dyncomplex']['mean'],
+            "complexity": json_data['lowlevel']['spectral_complexity']['mean']
             }
 
 def extract_all_mfccs(audio_files):
@@ -75,18 +76,19 @@ def getProps(props, dict):
 def concat_features(input_data):
     features = list(map(lambda data: 
                list(tz.concat(getProps(
-                   #['flatness', 'complexity', 'dyncomplexity','mfccMean','spectralContrast','onsets'], 
-                   #['mfccMean','flatness', 'complexity'],
-                   ['mfccMean'],
+                   ['flatness', 'complexity', 'dyncomplexity','mfccMean','onsets'], 
+                   #['mfccMean','flatness', 'complexity', 'onsets'],
+                   #['mel'],
+                   #['mfccMean'],
                    data))),
     input_data))
     #print(features)
     return features
 
 def save_as_matrix(features):
-    save_descriptors_as_matrix('dataBaseAsMatrix_standard.csv', features)
+    save_descriptors_as_matrix('dataBaseAsMatrix_standard_5f.csv', features)
 
 #test
 input_data = extract_all_mfccs(sorted(glob.glob('Segments/' + "*.wav")))
-#print(input_data)
+print(input_data)
 save_as_matrix(concat_features(input_data))
