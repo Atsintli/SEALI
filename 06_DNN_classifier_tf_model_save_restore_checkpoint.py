@@ -40,12 +40,11 @@ parse_testset()
 
 tr_features = np.array(trainset)
 tr_labels = np.array(clases)
-tr_features, tr_labels = shuffle(tr_features, tr_labels)
+#tr_features, tr_labels = shuffle(tr_features, tr_labels)
 
 ts_features = (np.array(testset))
 ts_labels = np.array(testclases)
 ts_features, ts_labels = shuffle(ts_features, ts_labels)
-
 
 ### Define a model
 ins=15
@@ -55,9 +54,11 @@ ins2=2048
 def create_model():
   model = tf.keras.models.Sequential([
     keras.layers.Dense(ins2, activation=tf.nn.relu, input_shape=(ins,)),
-    keras.layers.Dropout(0.2),
+    #keras.layers.Dropout(0.5),
     keras.layers.Dense(ins2, activation=tf.nn.relu),
-    keras.layers.Dropout(0.2),
+    #keras.layers.Dropout(0.5),
+    keras.layers.Dense(ins2, activation=tf.nn.relu),
+    #keras.layers.Dropout(0.5),
     keras.layers.Dense(outs, activation=tf.nn.softmax)
   ])
   
@@ -82,12 +83,12 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
 
 model = create_model()
 model.fit(tr_features, tr_labels,  
-          batch_size=1000,
-          epochs = 50, 
+          batch_size=600,
+          epochs = 1000, 
           validation_data = (ts_features, ts_labels),
           callbacks = [cp_callback])  # pass callback to training
 
-dir = 'Models/saved_models/SCMIR_MODEL_3/1/'
+dir = 'Models/saved_models/SCMIR_MODEL_2/1/'
 if os.path.exists(dir):
     shutil.rmtree(dir)
 os.makedirs(dir)

@@ -25,13 +25,13 @@ def meanShift(features):  # features is [[float]]
     #                     random_state=True
     #                     )
 
-    bandwidth = estimate_bandwidth(features, quantile=0.04, 
-                                    n_samples=2405)
+    bandwidth = estimate_bandwidth(features, quantile=0.1, 
+                                    n_samples=24836)
 
     ms = MeanShift(
                 bandwidth=bandwidth, 
                 bin_seeding=True,
-                max_iter=500,
+                max_iter=5,
                 cluster_all=True)
     ms.fit(features)
     labels = ms.labels_
@@ -84,9 +84,9 @@ def writeFiles(n_clusters_, labels):
             #print(audiototal)
 
 
-def moveToFolders(n_clusters_, labels):
+def moveToFolders(n_clusters_, labels, folder_in, folder_out):
     files = []
-    for audio_files in sorted(glob.glob( 'Segments/' + "*.wav" )):
+    for audio_files in sorted(glob.glob(folder_in + "*.wav" )):
         names = audio_files.split('/')[1]
         #print(names)
         files.append(names)
@@ -99,7 +99,7 @@ def moveToFolders(n_clusters_, labels):
     clases = [int(x.split(" ")[1]) for x in clasescontent]
 
     for createFolders in range(n_clusters_):
-        folder = 'audioClases/Clase_' + str(createFolders)
+        folder = folder_out + str(createFolders)
         if not os.path.exists(folder):
             os.makedirs(folder)
 
@@ -107,11 +107,11 @@ def moveToFolders(n_clusters_, labels):
         ele = np.where(np.array(clases) == clase)[0]
         print("indices de clase " + str(clase) + " son: " + str(ele))
         for elements in ele:
-            num = 'Segments/{:05d}'.format(elements)
+            num = folder_in+'{:06d}'.format(elements)
             for audio_files in glob.glob(num + "*.wav"):
-                shutil.copy(audio_files, 'audioClases/Clase_' + str(clase))
+                shutil.copy(audio_files, folder_out + str(clase))
                 print('moviendo archivo', audio_files, 'a',
-                      'audioClases/Clase_' + str(clase))
+                      folder_out + str(clase))
 
 # Plot result
 

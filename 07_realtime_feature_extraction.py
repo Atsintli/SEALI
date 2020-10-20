@@ -17,14 +17,14 @@ from pythonosc import osc_server
 from pythonosc import udp_client
 import json
 
-sampleRate = 16000
+sampleRate = 44100
 frameSize = 2048 
 hopSize = 2048
 numberBands = 13
 onsets = 1
 
 # analysis parameters
-patchSize = 20  #control the velocity of the extractor 60 is approximately one second of audio
+patchSize = 30  #control the velocity of the extractor 20 is approximately one second of audio
 displaySize = 10
 
 bufferSize = patchSize * hopSize
@@ -38,10 +38,11 @@ mfcc = MFCC(numberCoefficients=13)
 fft = FFT() # this gives us a complex FFT
 c2p = CartesianToPolar()
 onset = OnsetDetection()
+eqloud = EqualLoudness()
 
 pool = Pool()
 
-vectorInput.data  >> frameCutter.signal
+vectorInput.data  >> eqloud.signal >> frameCutter.signal
 frameCutter.frame >> w.frame >> spec.frame
 spec.spectrum     >> mfcc.spectrum
 mfcc.bands        >> None
@@ -57,16 +58,17 @@ def callback(data):
     buffer[:] = array(unpack('f' * bufferSize, data))
     #print ("this is the buffer", buffer[:])
     mfccBuffer = np.zeros([numberBands])
-    onsetBuffer = np.zeros([onsets])
+    #onsetBuffer = np.zeros([onsets])
     reset(vectorInput)
     run(vectorInput)
     mfccBuffer = np.roll(mfccBuffer, -patchSize)
-    onsetBuffer = np.roll(mfccBuffer, -patchSize)
+    #onsetBuffer = np.roll(mfccBuffer, -patchSize)
     mfccBuffer = pool['mfcc'][-patchSize]
-    onsetBuffer = pool['onset'][-patchSize]
-    print ("MFCCs:", '\n', (mfccBuffer))
-    print ("OnsetDetection:", '\n', onsetBuffer)
-    features = np.concatenate((mfccBuffer, onsetBuffer), axis=None)
+    #onsetBuffer = pool['onset'][-patchSize]
+    #print ("MFCCs:", '\n', (mfccBuffer))
+    #print ("OnsetDetection:", '\n', onsetBuffer)
+    #features = np.concatenate((mfccBuffer, onsetBuffer), axis=None)
+    features = mfccBuffer
     features = features.tolist()
     return features
 
@@ -82,10 +84,15 @@ def tf_handler(args):
   clase_3 = data[0][3]
   clase_4 = data[0][4]
   clase_5 = data[0][5]
-  # clase_6 = data[0][6]
-  # clase_7 = data[0][3]
+  clase_6 = data[0][6]
+  # clase_7 = data[0][7]
+  # clase_8 = data[0][8]
+  # clase_9 = data[0][9]
 
-  event = max([clase_0,clase_1,clase_2,clase_3,clase_4,clase_5])
+  event = max([clase_0,clase_1,clase_2,clase_3,clase_4,clase_5,clase_6
+  #,clase_7,clase_8,clase_9
+  ])
+
   if event == clase_0:
     print (event, "\t", "clase_0")
   if event == clase_1:
@@ -98,10 +105,14 @@ def tf_handler(args):
     print (event, "\t", "clase_4")
   if event == clase_5:
     print (event, "\t", "clase_5")
+  if event == clase_6:
+     print (event, "\t", "clase_6")
   # if event == clase_7:
-  #   print (event, "clase_7")
+  #    print (event, "\t", "clase_7")
   # if event == clase_8:
-  #   print (event, "clase_8")
+  #    print (event, "\t", "clase_8")
+  # if event == clase_9:
+  #    print (event, "\t", "clase_9")
 
   # printable_data = "Compuesto", str(data)
   # if clase_0 > 0.4:
@@ -119,7 +130,7 @@ def tf_handler(args):
   # if clase_6 > 0.4:
   #   printable_data = "clase_6", str(clase_6)
   # print('\n', printable_data)
-  print ('\t', "Prediction:", data)
+  #print ('\t', "Prediction:", data)
 
 # capture and process the speakers loopback
 # the 2 selects the external interface Zoom h5 #3 for jack

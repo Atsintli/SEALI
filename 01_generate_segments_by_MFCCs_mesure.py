@@ -3,12 +3,8 @@ import os
 from essentia.standard import *
 import numpy as np
 
-#python3 cortador.py /Users/hugosg/Documents/OttoAudios/ /Users/hugosg/Documents/OttoSalida/
-#entrada carpeta con sonidos
-#salida lugar de carpeta nueva para guardar pedacitos
-
-rootDir = 'audio_data_base'
-out_dir = 'Segments/'
+rootDir = "estset"
+out_dir = 'Segmentstest/'
 print(rootDir)
 if not os.path.exists(out_dir):
 	os.makedirs(out_dir)
@@ -23,19 +19,19 @@ def segments_gen(fileName):
 	w = Windowing(type = 'hann')
 	spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
 	mfcc = MFCC()
-	mel = MelBands()
-	loudness = Loudness()
+	#mel = MelBands()
+	#loudness = Loudness()
 
 	logNorm = UnaryOperator(type='log')
 	pool = essentia.Pool()
 	print("num de samples", len(audio))
 	for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512, startFromZero=True):
 	    mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
-	    melBands = mel(spectrum(w(frame)))
+	    #melBands = mel(spectrum(w(frame)))
 	    pool.add('lowlevel.mfcc', mfcc_coeffs)
 	    # pool.add('lowlevel.mfcc_bands', mfcc_bands)
 	    # pool.add('lowlevel.mfcc_bands_log', logNorm(mfcc_bands))
-	    pool.add('lowlevel.melbands', melBands)
+	    #pool.add('lowlevel.melbands', melBands)
 
 
 	#pedazos muy grandes
@@ -67,14 +63,15 @@ def record_segments(audio, segments):
 		global counter
 		start_position = int(segments[segment_index] * 512)
 		end_position = int(segments[segment_index + 1] * 512)
-		writer = essentia.standard.MonoWriter(filename=out_dir + "{:05d}".format(counter) + ".wav", format="wav")(audio[start_position:end_position])
+		writer = essentia.standard.MonoWriter(filename=out_dir + "{:06d}".format(counter) + ".wav", format="wav")(audio[start_position:end_position])
 		counter = counter + 1
 
 for root, dirs, files in os.walk(rootDir):
-    path = root.split(os.sep)
-    for file in files:
-        #print(len(path) * '---', file)
-        file_name, file_extension = os.path.splitext(file)
-        if file_extension.lower() == ".wav":
-        	print('Cuting: ', file)
-        	segments_gen(root + "/" + file)
+	files.sort()
+	path = root.split(os.sep)
+	for file in files:
+			#print(len(path) * '---', file)
+			file_name, file_extension = os.path.splitext(file)
+			if file_extension.lower() == ".wav":
+				print('Cuting: ', file)
+				segments_gen(root + "/" + file)
