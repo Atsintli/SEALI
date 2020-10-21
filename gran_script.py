@@ -1,12 +1,12 @@
 import sys
 import os
 from essentia.standard import *
-import numpy as np
-import json
-import essentia
 import essentia.standard as ess
-import matplotlib.pyplot as plt
+import essentia
+import numpy as np
 from numpy import savetxt
+import json
+import matplotlib.pyplot as plt
 import glob
 import csv
 import os
@@ -23,58 +23,51 @@ import time
 
 begin_time = time.time()
 
-
 counter = 0
 
 def segments_gen(fileName):
+	loader = essentia.standard.MonoLoader(filename=fileName)
+	audio = loader()
 
-    if not os.path.exists(segments_dir):
-        os.makedirs(segments_dir)
-    
-    loader = essentia.standard.MonoLoader(filename=fileName)
-    audio = loader()
-    w = Windowing(type = 'hann')
-    spectrum = Spectrum()
-    mfcc = MFCC()
+	w = Windowing(type = 'hann')
+	spectrum = Spectrum()
+	mfcc = MFCC()
 
-    logNorm = UnaryOperator(type='log')
-    pool = essentia.Pool()
-    print("num de samples", len(audio))
-    for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512, startFromZero=True):
-        mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
-        pool.add('lowlevel.mfcc', mfcc_coeffs)
+	logNorm = UnaryOperator(type='log')
+	pool = essentia.Pool()
+	print("num de samples", len(audio))
+	for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512, startFromZero=True):
+	    mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
+	    pool.add('lowlevel.mfcc', mfcc_coeffs)
 
-    #pedazos muy pequenos
-    minimumSegmentsLength = 10
-    size1 = 300
-    inc1 = 60
-    size2 = 200
-    inc2 = 60
-    cpw = 9.5
 
-    features = [val for val in pool['lowlevel.mfcc'].transpose()]
+	#Sbic Parameters
+	minimumSegmentsLength = 10
+	size1 = 300
+	inc1 = 60
+	size2 = 200
+	inc2 = 60
+	cpw = 9.5
 
-    sbic = SBic(size1=size1, inc1=inc1,size2=size2, inc2=inc2,cpw=cpw, minLength=minimumSegmentsLength)
-    segments = sbic(np.array(features))
-    record_segments(audio,segments)
+	features = [val for val in pool['lowlevel.mfcc'].transpose()]
+	sbic = SBic(size1=size1, inc1=inc1,size2=size2, inc2=inc2,cpw=cpw, minLength=minimumSegmentsLength)
+	segments = sbic(np.array(features))
+	record_segments(audio,segments)
 
 def record_segments(audio, segments):
 	for segment_index in range(len(segments) - 1):
 		global counter
 		start_position = int(segments[segment_index] * 512)
 		end_position = int(segments[segment_index + 1] * 512)
-		writer = essentia.standard.MonoWriter(filename=segments_dir + "{:06d}".format(counter) + ".wav", format="wav")(audio[start_position:end_position])
+		writer = essentia.standard.MonoWriter(filename=out_dir + "{:06d}".format(counter) + ".wav", format="wav")(audio[start_position:end_position])
 		counter = counter + 1
 
-def read_files_gen_segments():
-    for root, dirs, files in os.walk(rootDir):
-        files.sort()
-        path = root.split(os.sep)
-        for file in files:
-                file_name, file_extension = os.path.splitext(file)
-                if file_extension.lower() == ".wav":
-                    print('Cuting: ', file)
-                    segments_gen(root + "/" + file)
+def gen_all_segments(audio_files):
+    return list(map(segments_gen, audio_files))
+
+input_data = gen_all_segments(sorted(glob.glob(rootDir + "*.wav")))
+
+print("Segments Done")
 
 #extract features
 

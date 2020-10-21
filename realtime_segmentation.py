@@ -47,7 +47,6 @@ frameCutter.frame >> w.frame >> spec.frame
 spec.spectrum     >> mfcc.spectrum
 mfcc.bands        >> None
 mfcc.mfcc         >> (pool, 'mfcc')
-#sbic.frame >> sbic.sbic 
 
 def callback(data):
     buffer[:] = array(unpack('f' * bufferSize, data))
@@ -58,7 +57,6 @@ def callback(data):
     mfccBuffer = np.roll(mfccBuffer, -patchSize)
     mfccBuffer = pool['mfcc'][-patchSize]
     features = mfccBuffer
-    #features = features.tolist()
     features = [val for val in pool['mfcc'].transpose()]
     segments = sbic(np.array(features))
     record_segments(buffer,segments)

@@ -20,7 +20,7 @@ def extract_mfccs(audio_file):
     spectrum = Spectrum()
     melBands = MelBands()
     w = Windowing(type='hann')
-    fft = FFT() # this gives us a complex FFT
+    fft = FFT()
 
     pool = essentia.Pool()
     for frame in ess.FrameGenerator(audio, frameSize=2048, hopSize=2048, startFromZero=True): #for chroma frameSize=8192*2, hopSize=8192, #fz=88200, hs=44100
@@ -52,7 +52,8 @@ def extract_mfccs(audio_file):
     json_data = get_json("features.json")
     #dyncomp = json_data['lowlevel']['dynamic_complexity']['mean']
 
-    #[[MFCC],[Chromagram],[SpecPcile, 0.95],[SpecPcile, 0.80],[SpecFlatness],[BeatStatistics]];
+    #SCMIR Audio Features
+    #[[MFCC],[Chromagram],[SpecPcile, 0.95],[SpecPcile, 0.80],[SpecFlatness]];
 
     #os.remove("mfccmean.json")
     return {"file": audio_file, 
