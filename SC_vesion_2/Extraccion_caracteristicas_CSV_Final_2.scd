@@ -7,7 +7,7 @@
 )
 
 (
-var filePath = ~dir ++ "/../dataBaseAsMatrix_scmir_21277.csv"; //este es el archivo que se va a crear con nuestros datos
+var filePath = ~dir ++ "/../dataBaseAsMatrix_scmir_21277_2.csv"; //este es el archivo que se va a crear con nuestros datos
 //Diccionario que contiene la base de datos de ejemplos de audio para analizar
 
 //var inputData = (

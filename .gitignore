@@ -81,3 +81,27 @@ dataset_movil_ii.csv
 testset_large.csv
 
 testset_small.csv
+
+array.npy
+
+database_names.csv
+
+draw_on_image_04.png
+
+essentia_dataset.csv
+
+open_paper_tree_essentia.csv
+
+sink_into_return.csv
+
+sink_into_return\+filename.csv
+
+test_loud.csv
+
+test_mfccs_test.csv
+
+test_mfccs.csv
+
+train_mfccs.csv
+
+unsupervised_dataBase.csv

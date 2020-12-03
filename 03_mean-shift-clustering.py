@@ -13,8 +13,10 @@ from itertools import cycle
 import shutil
 
 #file_in = "dataBaseAsMatrix_streaming.csv"
-file_in = "dataBaseAsMatrix_standard.csv"
+file_in = "sink_into_return+opt.csv"
 file_test = "dataBaseAsMatrix_standard_test.csv"
+folder_in = "segmentsTest/"
+folder_out = "sink_into_return+opt/"
 
 def meanShift(features):  # features is [[float]]
     # X, _ = make_blobs(n_samples=len(features),
@@ -25,13 +27,13 @@ def meanShift(features):  # features is [[float]]
     #                     random_state=True
     #                     )
 
-    bandwidth = estimate_bandwidth(features, quantile=0.1, 
-                                    n_samples=24836)
+    bandwidth = estimate_bandwidth(features, quantile=0.18, 
+                                    n_samples=76)
 
     ms = MeanShift(
                 bandwidth=bandwidth, 
-                bin_seeding=True,
-                max_iter=5,
+                bin_seeding=False,
+                max_iter=500,
                 cluster_all=True)
     ms.fit(features)
     labels = ms.labels_
@@ -135,6 +137,6 @@ features = loadtxt(file_in)
 
 a, b, c, d = meanShift(features)
 #writeFiles(n_clusters_=a, labels=b)
-savetxt("centros.csv",c)
+#savetxt("centros.csv",c)
 ploter(n_clusters_=a, labels=b, cluster_centers=c, X=d)
-moveToFolders(a, b)
+moveToFolders(a, b, folder_in=folder_in, folder_out=folder_out)

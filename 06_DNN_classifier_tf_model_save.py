@@ -14,10 +14,10 @@ testset = []
 testclases = []
 
 def parse_database():
-  with open("dataBaseAsMatrix_scmir_21277.csv") as archivo:
+  with open("essentia_dataset.csv") as archivo:
     lineas = archivo.read().splitlines()
     for l in lineas:
-      linea = l.split(' ')
+      linea = l.split(',')
       className = linea[-1]
       clases.append(int(className))
       floats = [float(i) for i in linea[0:-1]]
@@ -25,10 +25,11 @@ def parse_database():
   return trainset, clases 
 
 def parse_testset():
-  with open("dataBaseAsMatrix_scmir_21277.csv") as archivo:
+  #with open("testset_large.csv") as archivo:
+  with open("essentia_dataset.csv") as archivo:
     lineas = archivo.read().splitlines()
     for l in lineas:
-      linea = l.split(' ')
+      linea = l.split(',')
       className = linea[-1]
       testclases.append(int(className))
       floats = [float(i) for i in linea[0:-1]]
@@ -42,22 +43,24 @@ tr_features = np.array(trainset)
 tr_labels = np.array(clases)
 tr_features, tr_labels = shuffle(tr_features, tr_labels)
 
+print(tr_features.shape, tr_labels.shape)
+
 ts_features = (np.array(testset))
 ts_labels = np.array(testclases)
 ts_features, ts_labels = shuffle(ts_features, ts_labels)
 
-
 ### Define a model
-ins=15
+ins=13
 outs=7
-ins2=2048
+ins2=4096
 
 def create_model():
   model = tf.keras.models.Sequential([
     keras.layers.Dense(ins2, activation=tf.nn.relu, input_shape=(ins,)),
-    keras.layers.Dropout(0.2),
+    #keras.layers.Dropout(0.2),
     keras.layers.Dense(ins2, activation=tf.nn.relu),
-    keras.layers.Dropout(0.2),
+    keras.layers.Dense(ins2, activation=tf.nn.relu),
+    #keras.layers.Dropout(0.2),
     keras.layers.Dense(outs, activation=tf.nn.softmax)
   ])
   
@@ -82,12 +85,12 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
 
 model = create_model()
 model.fit(tr_features, tr_labels,  
-          batch_size=1000,
-          epochs = 50, 
+          batch_size=6000,
+          epochs = 100, 
           validation_data = (ts_features, ts_labels),
           callbacks = [cp_callback])  # pass callback to training
 
-dir = 'Models/saved_models/SCMIR_MODEL_3/1/'
+dir = 'Models/saved_models/ESSENTA_MODEL_2/1/'
 if os.path.exists(dir):
     shutil.rmtree(dir)
 os.makedirs(dir)

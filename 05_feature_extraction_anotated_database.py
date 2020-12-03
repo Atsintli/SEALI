@@ -10,8 +10,8 @@ import os
 from utils import get_json
 import json
 
-in_dir = 'movil2/'
-csv_file = 'database_as_matrix_mfcc_onsets_movil.csv'
+in_dir = '/../../media/atsintli/Samsung/audioClases/'
+csv_file = 'essentia_dataset.csv'
 file_out = open(csv_file, 'w') #for erasing the file if already has data
 #f_out = 'anotatedDataBase_movil.csv'
 #f_out = 'anotatedMFCCsAsStrings.csv'
@@ -27,13 +27,13 @@ def extract_features(path):
 
   pool = essentia.Pool()
   for frame in ess.FrameGenerator(audio, frameSize = 2048, hopSize = 2048, startFromZero=True):
-      mag, phase, = CartesianToPolar()(fft(w(frame)))
+      #mag, phase, = CartesianToPolar()(fft(w(frame)))
       mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
       #loudness = Loudness()(mag)
-      onset = OnsetDetection()(mag,phase)
+      #onset = OnsetDetection()(mag,phase)
 
       pool.add('lowlevel.mfcc', mfcc_coeffs)
-      pool.add('lowlevel.onsets', onset)
+      #pool.add('lowlevel.onsets', onset)
       #pool.add('lowlevel.loudness', [loudness])
       #pool.add('lowlevel.loudness', average_loudness)
       #pool.add('lowlevel.mfcc_bands', mfcc_bands)
@@ -51,7 +51,7 @@ def extract_features(path):
   #save_descriptors_as_strings():
   f_in = 'features.json'
   features = get_json(f_in)['lowlevel']['mfcc']['mean']
-  features.append(get_json(f_in)['lowlevel']['onsets']['mean'])
+  #features.append(get_json(f_in)['lowlevel']['onsets']['mean'])
   #features.append('0') //for testset
   features.append(class_number)
   f_out = csv_file
@@ -73,7 +73,6 @@ for root, dirs, files in os.walk(in_dir):
         if file_extension.lower() == ".wav":
             audio_file = in_dir + root + file
             extract_features(audio_file)
-
 
 print('Done')
 

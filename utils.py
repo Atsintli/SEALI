@@ -15,7 +15,6 @@ def save_matrix_array(file_name, matrixes):
         for matrix in matrixes:
             savetxt(f, matrix)
 
-
 def save_as_json(file_name, data):
     with open(file_name, 'w') as f:
         f.write(json.dumps(data))
@@ -24,5 +23,5 @@ def save_as_json(file_name, data):
 def save_descriptors_as_matrix(file_name, features):
 	with open(file_name, 'w') as f:
 	    m = np.matrix(features)
-	    savetxt(f, m)
+	    savetxt(f, m, fmt='%s') #fmt='%s'
 	print('Save Descriptors as Matrix: Done')
