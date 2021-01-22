@@ -24,7 +24,7 @@ numberBands = 13
 onsets = 1
 
 # analysis parameters
-patchSize = 30  #control the velocity of the extractor 20 is approximately one second of audio
+patchSize = 2  #control the velocity of the extractor 20 is approximately one second of audio
 displaySize = 10
 
 bufferSize = patchSize * hopSize

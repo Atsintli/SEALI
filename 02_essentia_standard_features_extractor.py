@@ -17,8 +17,8 @@ def extract_mfccs(audio_file):
     loader = essentia.standard.MonoLoader(filename=audio_file)
     print("Analyzing:" + audio_file)
     audio = loader()
-    spectrum = Spectrum()
-    melBands = MelBands()
+    #spectrum = Spectrum()
+    #melBands = MelBands()
     w = Windowing(type='hann')
     fft = FFT()
 
@@ -36,6 +36,7 @@ def extract_mfccs(audio_file):
         #dynamic_complexity, loudness = DynamicComplexity()(mag)
         #spectral_complex = SpectralComplexity()(mag)
         #croma = Chromagram(sampleRate=2048*5)(mag[1:],)
+        #loudness = Loudness()(mag)
 
         pool.add('lowlevel.mfcc', mfcc_coeffs)
         #pool.add('lowlevel.loudness', [loudness])
@@ -48,7 +49,7 @@ def extract_mfccs(audio_file):
         #pool.add('lowlevel.chroma', croma)
     
     pool.add('audio_file', (name))
-    aggrPool = PoolAggregator(defaultStats=['mean'])(pool)
+    aggrPool = PoolAggregator(defaultStats=['mean','var'])(pool)
 
     YamlOutput(filename='features.json', format='json',
                writeVersion=False)(aggrPool)
@@ -62,8 +63,9 @@ def extract_mfccs(audio_file):
     #os.remove("mfccmean.json")
     return {"file": json_data['audio_file'], 
             "mfccMean": json_data['lowlevel']['mfcc']['mean'], 
+            "mfccVar": json_data['lowlevel']['mfcc']['var'], 
             #"mel": json_data['lowlevel']['melbands']['mean'], 
-            # "loudness": json_data['lowlevel']['loudness']['mean'],
+            #"loudness": json_data['lowlevel']['loudness']['mean'],
             # "spectralContrast": json_data['lowlevel']['spectralcontrast']['mean'],
             # "chroma": json_data['lowlevel']['chroma']['mean'],
             #"flatness": json_data['lowlevel']['flatness']['mean'],
@@ -84,17 +86,18 @@ def concat_features(input_data):
                    #['flatness', 'complexity', 'dyncomplexity','mfccMean','onsets'], 
                    #['mfccMean','flatness', 'complexity', 'onsets'],
                    #['mel'],
-                   ['mfccMean', 'file'],
+                   ['mfccMean', 'mfccVar'],
+                   #['loudness'],
                    data))),
     input_data))
     #print(features)
     return features
 
 def save_as_matrix(features):
-    save_descriptors_as_matrix('database_names.csv', features)
+    save_descriptors_as_matrix('for_than_foam_mfcc_mean_variance_.csv', features)
 
 #test
 
-input_data = extract_all_mfccs(sorted(glob.glob('Segments/' + "*.wav")))
+input_data = extract_all_mfccs(sorted(glob.glob('segments_short/' + "*.wav")))
 #print(input_data)
 save_as_matrix(concat_features(input_data))

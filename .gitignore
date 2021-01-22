@@ -105,3 +105,17 @@ test_mfccs.csv
 train_mfccs.csv
 
 unsupervised_dataBase.csv
+
+*.json
+
+*.csv
+
+Autocomposer/test_3wav
+
+ConcatenaAudiosEnvolvente.py
+
+play_files_by_euclidean_distance.py
+
+Prototipo del Sistema de generación auto.txt
+
+sequence_generator.py

@@ -1,14 +1,15 @@
 from numpy import savetxt
 import numpy as np
 import json
-
+import glob
+import librosa
+import os
 
 def get_json(filename):
     resultF = open(filename, 'r')
     result = resultF.read()
-    resultF.close()
+    #resultF.close()
     return json.loads(result)
-
 
 def save_matrix_array(file_name, matrixes):
     with open(file_name, 'w') as f:
@@ -25,3 +26,4 @@ def save_descriptors_as_matrix(file_name, features):
 	    m = np.matrix(features)
 	    savetxt(f, m, fmt='%s') #fmt='%s'
 	print('Save Descriptors as Matrix: Done')
+

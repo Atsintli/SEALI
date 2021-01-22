@@ -9,7 +9,7 @@ plt.rcParams['figure.figsize'] = (15, 6) # set plot sizes to something larger th
 
 
 in_dir = 'audios_test/'
-out_dir = 'segmentsTest_erase/'
+out_dir = 'segments_short/'
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
@@ -49,18 +49,26 @@ def segments_gen(fileName):
     # cpw = 1.5
 
     #segmentos medianos
-    minimumSegmentsLength = 10
-    size1 = 300
-    inc1 = 60
-    size2 = 200
-    inc2 = 60
-    cpw = 4.5
+    # minimumSegmentsLength = 10
+    # size1 = 300
+    # inc1 = 60
+    # size2 = 200
+    # inc2 = 60
+    # cpw = 4.5
+
+    #segmentos diminutos
+    minimumSegmentsLength = 1
+    size1 = 50
+    inc1 = 30
+    size2 = 50
+    inc2 = 30
+    cpw = 1
 
     features = [val for val in pool['lowlevel.mfcc'].transpose()]
     #features = [val for val in pool['lowlevel.melbands'].transpose()]
     sbic = SBic(size1=size1, inc1=inc1,size2=size2, inc2=inc2,cpw=cpw, minLength=minimumSegmentsLength)
     segments = sbic(np.array(features))
-    #record_segments(audio,segments)
+    record_segments(audio,segments)
 
     # plot(audio)
     # for segment in segments:
