@@ -18,7 +18,7 @@ except OSError as e:
     print ("Error: %s - %s." % (e.filename, e.strerror))
 
 #points = loadtxt('dataBaseAsMatrix_2.csv')
-points = loadtxt('dataBaseAsMatrix_standard_mel_test.csv')
+points = loadtxt('mean_var_mfcc_flauta_.csv')
 
 def input_fn():
   return tf.train.limit_epochs(
@@ -26,12 +26,12 @@ def input_fn():
 
 len_X = (len(input_fn()))
 
-num_clusters = 8
+num_clusters = 4
 kmeans = tf.compat.v1.estimator.experimental.KMeans(
     num_clusters=num_clusters, use_mini_batch=True, feature_columns=None)
 
 # train
-num_iterations = 50
+num_iterations = 200
 previous_centers = None 
 for _ in range(num_iterations):
   kmeans.train(input_fn)
@@ -52,7 +52,7 @@ for i, point in enumerate(points):
 
 def moveToFolders(n_clusters_, labels):
     files = []
-    for audio_files in sorted(glob.glob( 'Segmentstest/' + "*.wav" )):
+    for audio_files in sorted(glob.glob( 'segments_flauta/' + "*.wav" )):
         names = audio_files.split('/')[1]
         #print(names)
         files.append(names)
@@ -73,7 +73,7 @@ def moveToFolders(n_clusters_, labels):
         ele = np.where(np.array(clases) == clase)[0]
         print("indices de clase " + str(clase) + " son: " + str(ele))
         for elements in ele:
-            num = 'Segmentstest/{:05d}'.format(elements)
+            num = 'segments_flauta/{:06d}'.format(elements)
             for audio_files in glob.glob(num + "*.wav"):
                 shutil.copy(audio_files, 'audioClases_kMeans/Clase_' + str(clase))
                 print('moviendo archivo', audio_files, 'a',

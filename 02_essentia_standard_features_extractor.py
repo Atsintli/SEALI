@@ -9,7 +9,7 @@ import glob
 import csv
 import os
 from utils import get_json, save_as_json, save_matrix_array
-from utils import save_descriptors_as_matrix 
+from utils import save_descriptors_as_matrix
 import toolz as tz
 
 
@@ -18,7 +18,6 @@ def extract_mfccs(audio_file):
     print("Analyzing:" + audio_file)
     audio = loader()
     #spectrum = Spectrum()
-    #melBands = MelBands()
     w = Windowing(type='hann')
     fft = FFT()
 
@@ -29,25 +28,32 @@ def extract_mfccs(audio_file):
     for frame in ess.FrameGenerator(audio, frameSize=2048, hopSize=2048, startFromZero=True): #for chroma frameSize=8192*2, hopSize=8192, #fz=88200, hs=44100
         mag, phase, = CartesianToPolar()(fft(w(frame)))
         mfcc_bands, mfcc_coeffs = MFCC(numberCoefficients=13)(mag)
-        #mel_bands = melBands(spectrum(w(frame)))
-        # contrast, spectralValley = SpectralContrast()(mag)
-        #flatness = Flatness()(mag) 
+        #mel_bands = MelBands()(spectrum(w(frame)))
+        contrast, spectralValley = SpectralContrast()(mag)
+        flatness = Flatness()(mag)
+        #dens = Welch()(spectrum(w(frame)))
         #onset = OnsetDetection()(mag,phase)
         #dynamic_complexity, loudness = DynamicComplexity()(mag)
-        #spectral_complex = SpectralComplexity()(mag)
+        spectral_complex = SpectralComplexity()(mag)
+        centroid = Centroid()(mag)
         #croma = Chromagram(sampleRate=2048*5)(mag[1:],)
-        #loudness = Loudness()(mag)
+        loudness = Loudness()(mag)
+
+        #probar utilizando un for para extraer todos los descriptores con alguna función de essentia
+        
 
         pool.add('lowlevel.mfcc', mfcc_coeffs)
-        #pool.add('lowlevel.loudness', [loudness])
+        pool.add('lowlevel.loudness', [loudness])
         #pool.add('lowlevel.melbands', mel_bands)
-        #pool.add('lowlevel.spectralcontrast', contrast)
-        #pool.add('lowlevel.flatness', [flatness])
+        pool.add('lowlevel.spectralcontrast', contrast)
+        pool.add('lowlevel.flatness', [flatness])
         #pool.add('lowlevel.onsets', [onset])
         #pool.add('lowlevel.dyncomplex', [dynamic_complexity])
-        #pool.add('lowlevel.spectral_complexity', [spectral_complex])
+        pool.add('lowlevel.spectral_complexity', [spectral_complex])
         #pool.add('lowlevel.chroma', croma)
-    
+        #pool.add('lowlevel.dens', dens)
+        pool.add('lowlevel.centroid', [centroid])
+
     pool.add('audio_file', (name))
     aggrPool = PoolAggregator(defaultStats=['mean','var'])(pool)
 
@@ -61,17 +67,20 @@ def extract_mfccs(audio_file):
     #[[MFCC],[Chromagram],[SpecPcile, 0.95],[SpecPcile, 0.80],[SpecFlatness]];
 
     #os.remove("mfccmean.json")
-    return {"file": json_data['audio_file'], 
-            "mfccMean": json_data['lowlevel']['mfcc']['mean'], 
-            "mfccVar": json_data['lowlevel']['mfcc']['var'], 
-            #"mel": json_data['lowlevel']['melbands']['mean'], 
-            #"loudness": json_data['lowlevel']['loudness']['mean'],
-            # "spectralContrast": json_data['lowlevel']['spectralcontrast']['mean'],
+    return {"file": json_data['audio_file'],
+            "mfccMean": json_data['lowlevel']['mfcc']['mean'],
+            "mfccVar": json_data['lowlevel']['mfcc']['var'],
+            #"mel": json_data['lowlevel']['melbands']['mean'],
+            "loudness": json_data['lowlevel']['loudness']['mean'],
+            "spectralContrast": json_data['lowlevel']['spectralcontrast']['mean'],
             # "chroma": json_data['lowlevel']['chroma']['mean'],
-            #"flatness": json_data['lowlevel']['flatness']['mean'],
+            "flatness": json_data['lowlevel']['flatness']['mean'],
             #"onsets": json_data['lowlevel']['onsets']['mean'],
             #"dyncomplexity": json_data['lowlevel']['dyncomplex']['mean'],
-            #"complexity": json_data['lowlevel']['spectral_complexity']['mean']
+            "complexity": json_data['lowlevel']['spectral_complexity']['mean'],
+            #"dens": json_data['lowlevel']['dens']['mean'],
+            #"densVar": json_data['lowlevel']['dens']['var'],
+            "centroid": json_data['lowlevel']['centroid']['mean']
             }
 
 def extract_all_mfccs(audio_files):
@@ -81,12 +90,12 @@ def getProps(props, dict):
     return map(lambda prop: dict[prop], props)
 
 def concat_features(input_data):
-    features = list(map(lambda data: 
+    features = list(map(lambda data:
                list(tz.concat(getProps(
-                   #['flatness', 'complexity', 'dyncomplexity','mfccMean','onsets'], 
+                   ['flatness', 'mfccVar','complexity','mfccMean','loudness','centroid','spectralContrast'],
                    #['mfccMean','flatness', 'complexity', 'onsets'],
                    #['mel'],
-                   ['mfccMean', 'mfccVar'],
+                   #['mfccMean', 'mfccVar'],
                    #['loudness'],
                    data))),
     input_data))
@@ -94,10 +103,10 @@ def concat_features(input_data):
     return features
 
 def save_as_matrix(features):
-    save_descriptors_as_matrix('for_than_foam_mfcc_mean_variance_.csv', features)
+    save_descriptors_as_matrix('sink_into_return.csv', features)
 
 #test
 
-input_data = extract_all_mfccs(sorted(glob.glob('segments_short/' + "*.wav")))
+input_data = extract_all_mfccs(sorted(glob.glob('audiotestsplits/' + "*.wav")))
 #print(input_data)
 save_as_matrix(concat_features(input_data))

@@ -20,11 +20,12 @@ import json
 sampleRate = 44100
 frameSize = 2048 
 hopSize = 2048
-numberBands = 13
+numberBands = 3
 onsets = 1
+loudness = 1
 
 # analysis parameters
-patchSize = 2  #control the velocity of the extractor 20 is approximately one second of audio
+patchSize = 20  #control the velocity of the extractor 20 is approximately one second of audio
 displaySize = 10
 
 bufferSize = patchSize * hopSize
@@ -38,9 +39,10 @@ mfcc = MFCC(numberCoefficients=13)
 fft = FFT() # this gives us a complex FFT
 c2p = CartesianToPolar()
 onset = OnsetDetection()
-eqloud = EqualLoudness()
+eqloud = EqualLoudness() #checar esto!!!
 
 pool = Pool()
+#b = LoudnessEBUR128(hopSize=0.1, sampleRate=44100)
 
 vectorInput.data  >> eqloud.signal >> frameCutter.signal
 frameCutter.frame >> w.frame >> spec.frame
@@ -51,6 +53,7 @@ w.frame           >> fft.frame
 fft.fft           >> c2p.complex
 c2p.magnitude     >> onset.spectrum
 c2p.phase         >> onset.phase
+#b.momentaryLoudness >> (pool, 'momentaryLoudness')
 onset.onsetDetection >> (pool, 'onset')
 
 def callback(data):
@@ -59,54 +62,72 @@ def callback(data):
     #print ("this is the buffer", buffer[:])
     mfccBuffer = np.zeros([numberBands])
     #onsetBuffer = np.zeros([onsets])
+    #loudnessBuffer = np.zeros([loudness])
     reset(vectorInput)
     run(vectorInput)
     mfccBuffer = np.roll(mfccBuffer, -patchSize)
     #onsetBuffer = np.roll(mfccBuffer, -patchSize)
+    #loudnessBuffer = np.roll(loudnessBuffer, -patchSize)
     mfccBuffer = pool['mfcc'][-patchSize]
     #onsetBuffer = pool['onset'][-patchSize]
+    #loudnessBuffer = pool['momentaryLoudness'][-patchSize]
     #print ("MFCCs:", '\n', (mfccBuffer))
     #print ("OnsetDetection:", '\n', onsetBuffer)
+    #print ("momentaryLoudness:", '\n', loudnessBuffer)
     #features = np.concatenate((mfccBuffer, onsetBuffer), axis=None)
     features = mfccBuffer
     features = features.tolist()
+    print(features)
     return features
 
 def tf_handler(args):
   headers = {"content-type": "application/json"}
   data = {"instances": [args]}
+  #data = {"instances": [[-1264.91162109375, 3.0517578125e-05, -6.866455078125e-05]]} #this format is correct
+  #print([[*args]])
   r = requests.post(url = "http://localhost:8501/v1/models/improv_class:predict", data=json.dumps(data), headers=headers)
-  data = r.json()["predictions"]
+  #data = r.json()["predictions"]
+  response = r.json()
+  #print(response)
+  data = response["predictions"]
+  print(data)
+  #return data[0]
+
+  clases=data[0]
+  event = max(clases)
+  index = clases.index(event)
+  print (index)
   
-  clase_0 = data[0][0]
-  clase_1 = data[0][1]
-  clase_2 = data[0][2]
-  clase_3 = data[0][3]
-  clase_4 = data[0][4]
-  clase_5 = data[0][5]
-  clase_6 = data[0][6]
+  # clase_0 = data[0][0]
+  # clase_1 = data[0][1]
+  # clase_2 = data[0][2]
+  # clase_3 = data[0][3]
+  # clase_4 = data[0][4]
+  #clase_5 = data[0][5]
+  #clase_6 = data[0][6]
   # clase_7 = data[0][7]
   # clase_8 = data[0][8]
   # clase_9 = data[0][9]
 
-  event = max([clase_0,clase_1,clase_2,clase_3,clase_4,clase_5,clase_6
+  #event = max([clase_0,clase_1,clase_2,clase_3,clase_4,
+  #clase_4,clase_5,clase_6
   #,clase_7,clase_8,clase_9
-  ])
+  #])
 
-  if event == clase_0:
-    print (event, "\t", "clase_0")
-  if event == clase_1:
-    print (event, "\t", "clase_1")
-  if event == clase_2:
-    print (event, "\t", "clase_2")
-  if event == clase_3:
-    print (event, "\t", "clase_3")
-  if event == clase_4:
-    print (event, "\t", "clase_4")
-  if event == clase_5:
-    print (event, "\t", "clase_5")
-  if event == clase_6:
-     print (event, "\t", "clase_6")
+  # if event == clase_0:
+  #   print (event, "\t", "clase_0")
+  # if event == clase_1:
+  #   print (event, "\t", "clase_1")
+  # if event == clase_2:
+  #   print (event, "\t", "clase_2")
+  # if event == clase_3:
+  #   print (event, "\t", "clase_3")
+  # if event == clase_4:
+  #   print (event, "\t", "clase_4")
+  #if event == clase_5:
+  #  print (event, "\t", "clase_5")
+  #if event == clase_6:
+  #   print (event, "\t", "clase_6")
   # if event == clase_7:
   #    print (event, "\t", "clase_7")
   # if event == clase_8:

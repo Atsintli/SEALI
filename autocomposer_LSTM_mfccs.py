@@ -53,6 +53,7 @@ with open('anotated_MSC_mfccs_name2.json') as f:
   jsonData = json.load(f)
 
 myData = jsonData.values()# [[{mfccMean: [], className: "1", fileName: ''}], [{mfccMean: [], className: "2", fileName: ''}]]
+#print("soy mydata", myData)
 flatten = lambda t: [item for sublist in t for item in sublist]
 myFlatData = flatten(myData) # [{mfccMean: [], className: "1", fileName: ''}, {mfccMean: [], className: "2", fileName: ''}]
 #print("soy flaten", myFlatData)

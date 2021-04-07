@@ -1,90 +1,51 @@
-#import Extract_MFCCs as xmfccs
+#%%
 import glob
 #import librosa
 import csv
 import numpy as np
 from sklearn.cluster import MeanShift, estimate_bandwidth
 from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.decomposition import PCA
 from numpy import loadtxt
 from numpy import savetxt
 import os
 import matplotlib.pyplot as plt
 from itertools import cycle
 import shutil
+from csv import writer
+from csv import reader
 
-#file_in = "dataBaseAsMatrix_streaming.csv"
-file_in = "sink_into_return+opt.csv"
-file_test = "dataBaseAsMatrix_standard_test.csv"
-folder_in = "segmentsTest/"
-folder_out = "sink_into_return+opt/"
+def meanShift(features):  #features is [[float]]
+    #Standardize the feature matrix
+    #tr_features = StandardScaler().fit_transform(features) #quite .data de features
+    #Create a PCA
+    pca = PCA(n_components=2,)# whiten=True) # svd_solver="randomized"
 
-def meanShift(features):  # features is [[float]]
-    # X, _ = make_blobs(n_samples=len(features),
-    #                     n_features=19,
-    #                     centers=features, 
-    #                     cluster_std=0.1,
-    #                     shuffle=True,
-    #                     random_state=True
-    #                     )
+    features_pca = pca.fit_transform(features)
 
-    bandwidth = estimate_bandwidth(features, quantile=0.18, 
-                                    n_samples=76)
+    print(features.shape[1])
+    print(len(features_pca))
+    print (features_pca.shape[1])
+    print(features_pca[0:5])
+
+    bandwidth = estimate_bandwidth(features_pca, quantile=0.04,
+                                    n_samples=None)
 
     ms = MeanShift(
-                bandwidth=bandwidth, 
-                bin_seeding=False,
-                max_iter=500,
+                bandwidth=bandwidth,
+                bin_seeding=True,
+                max_iter=1000,
                 cluster_all=True)
-    ms.fit(features)
+    ms.fit(features_pca)
     labels = ms.labels_
     cluster_centers = ms.cluster_centers_
 
     labels_unique = np.unique(labels)
     n_clusters_ = len(labels_unique)
-
     #print("number of estimated clusters : %d" % n_clusters_)
-    P = ms.predict(features)
-    return n_clusters_, labels, cluster_centers, features
-
-###Write files by the number of clusters###
-
-def writeFiles(n_clusters_, labels):
-    folder = 'Clusters/'
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    files = []
-
-    for audio_files in sorted(glob.glob( 'Segments/' + "*.wav" )):
-        names = audio_files.split('/')[1]
-        #print(names)
-        files.append(names)
-
-    with open('archivos_clases.txt', 'w') as f:
-        writer = csv.writer(f, delimiter=' ')
-        writer.writerows(zip(files, labels))
-
-    # concatenate classes in archives
-    clases = open('archivos_clases.txt')
-    clasescontent = clases.readlines()
-    clases = [int(x.split(" ")[1]) for x in clasescontent]
-
-    for clase in range(n_clusters_):
-        print("iterando sobre " + str(clase))
-        ele = np.where(np.array(clases) == clase)[0]
-        print("indices de clase " + str(clase) + " son: " + str(ele))
-        #print(ele)
-        audiototal = np.array([])
-        for elements in ele:
-            num = 'Segments/{:06d}'.format(elements)
-            for audio_files in sorted(glob.glob(num + "*.wav")):
-                print("Escribiendo " + audio_files)
-                y, sr = librosa.load(audio_files)
-                audiototal = np.append(audiototal, y)
-                #print(audiototal)
-                librosa.output.write_wav("Clusters/" + "CLASE_"
-                                         + str(clase) + ".wav", audiototal, sr)
-            #print(audiototal)
-
+    P = ms.predict(features_pca)
+    return n_clusters_, labels, cluster_centers, features_pca
 
 def moveToFolders(n_clusters_, labels, folder_in, folder_out):
     files = []
@@ -115,8 +76,6 @@ def moveToFolders(n_clusters_, labels, folder_in, folder_out):
                 print('moviendo archivo', audio_files, 'a',
                       folder_out + str(clase))
 
-# Plot result
-
 def ploter(n_clusters_, labels, cluster_centers, X):
     plt.figure(1)
     plt.clf()
@@ -130,13 +89,34 @@ def ploter(n_clusters_, labels, cluster_centers, X):
     plt.title('Estimated number of clusters: %d' % n_clusters_)
     plt.show()
 
+def assing_label_to_dataset(input_file, output_file, transform_row):
+    with open(input_file, 'r') as read_obj, \
+            open(output_file, 'w', newline='') as write_obj:
+        csv_reader = reader(read_obj)
+        # Create a csv.writer object from the output file object
+        csv_writer = writer(write_obj)
+        # Read each row of the input csv file as list
+        for row in csv_reader:
+            # Pass the list / row in the transform function to add column text for this row
+            transform_row(row, csv_reader.line_num)
+            # Write the updated row / list to the output file
+            csv_writer.writerow(row)
 
-#features = list(xmfccs.extract_all_mfccs(glob.glob('Segments/' + "*.wav")))
 
+file_in = "sink_into_return.csv"
+folder_in = "segments_music18/"
+folder_out = "clusters_music18/"
 features = loadtxt(file_in)
-
 a, b, c, d = meanShift(features)
+
+#%%
 #writeFiles(n_clusters_=a, labels=b)
 #savetxt("centros.csv",c)
+#moveToFolders(a, b, folder_in=folder_in, folder_out=folder_out)
 ploter(n_clusters_=a, labels=b, cluster_centers=c, X=d)
-moveToFolders(a, b, folder_in=folder_in, folder_out=folder_out)
+#csv_fileOut = "dataset_label_test.csv"
+#labels = b.tolist()
+#print("soy len", len(labels))
+#assing_label_to_dataset(file_in, csv_fileOut, lambda row, line_num: row.append(b[line_num -1]))
+
+# %%

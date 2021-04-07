@@ -1,0 +1,28 @@
+startTime: 0
+endTime: 30
+outputFrames: 0
+outputFormat: json
+requireMbid: false
+indent: 4
+
+lowlevel:
+    frameSize: 2048
+    hopSize: 1024
+    zeroPadding: 0
+    windowType: blackmanharris62
+    silentFrames: noise
+    stats: ["mean"]
+
+rhythm:
+    method: degara
+    minTempo: 40
+    maxTempo: 208
+    stats: ["mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"]
+    
+tonal:
+    frameSize: 4096
+    hopSize: 2048
+    zeroPadding: 0
+    windowType: blackmanharris62
+    silentFrames: noise
+    stats: ["mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"]

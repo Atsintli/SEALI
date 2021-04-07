@@ -24,7 +24,7 @@ def extract_mfccs(audio_file):
 
     mfccs = []
 
-    for frame in FrameGenerator(audio, frameSize=1024, hopSize=512, startFromZero=True):
+    for frame in FrameGenerator(audio, frameSize=4096, hopSize=4096, startFromZero=True):
         mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
 
         mfccs.append(mfcc_coeffs)

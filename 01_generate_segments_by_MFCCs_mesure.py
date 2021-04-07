@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 plt.rcParams['figure.figsize'] = (15, 6) # set plot sizes to something larger than default
 
 
-in_dir = 'audios_test/'
-out_dir = 'segments_short/'
+#in_dir = '../../Samsung/Música/aarón/SEALI_HP/04/'
+in_dir = '../../Samsung/Música/Music_18/'
+out_dir = 'segments_music18/'
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
@@ -30,7 +31,7 @@ def segments_gen(fileName):
 
     logNorm = UnaryOperator(type='log')
     pool = essentia.Pool()
-    for frame in FrameGenerator(audio, frameSize = 2048, hopSize = 512, startFromZero=True):
+    for frame in FrameGenerator(audio, frameSize = 2048, hopSize = 512, startFromZero=True): #2048, 512
         mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
         #melBands = mel(spectrum(w(frame)))
         pool.add('lowlevel.mfcc', mfcc_coeffs)
@@ -56,12 +57,20 @@ def segments_gen(fileName):
     # inc2 = 60
     # cpw = 4.5
 
+    # #segmentos diminutos
+    # minimumSegmentsLength = 1
+    # size1 = 50
+    # inc1 = 30
+    # size2 = 50
+    # inc2 = 30
+    # cpw = 1
+
     #segmentos diminutos
     minimumSegmentsLength = 1
-    size1 = 50
-    inc1 = 30
-    size2 = 50
-    inc2 = 30
+    size1 = 10
+    inc1 = 10
+    size2 = 10
+    inc2 = 10
     cpw = 1
 
     features = [val for val in pool['lowlevel.mfcc'].transpose()]
@@ -88,10 +97,6 @@ def record_segments(audio, segments):
 def gen_all_segments(audio_files):
 	return list(map(segments_gen, audio_files))
 
-input_data = gen_all_segments(sorted(glob.glob(in_dir + "*.wav")))
+input_data = gen_all_segments(sorted(glob.glob(in_dir + "*.mp3")))
 
 print("Done")
-
-
-
-
